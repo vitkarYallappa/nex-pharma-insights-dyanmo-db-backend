@@ -12,6 +12,7 @@ from app.core.logging import setup_logging, get_logger
 from app.core.response import ResponseFormatter, APIResponse
 from app.core.database import dynamodb_client
 from app.routes.user_routes import router as user_router
+from app.routes.project_routes import router as project_router
 from app.routes.migration_routes import router as migration_router
 from app.routes.seeder_routes import router as seeder_router
 
@@ -71,6 +72,12 @@ app.include_router(
     tags=["Users"]
 )
 
+app.include_router(
+    project_router,
+    prefix="/api/v1/projects",
+    tags=["Projects"]
+)
+
 # Migration and Seeder Routes
 app.include_router(
     migration_router,
@@ -127,6 +134,7 @@ async def root() -> APIResponse:
         "environment": settings.ENVIRONMENT,
         "endpoints": {
             "users": "/api/v1/users",
+            "projects": "/api/v1/projects",
             "migrations": "/api/v1/migrations",
             "seeders": "/api/v1/seeders",
             "health": "/health",

@@ -13,4 +13,8 @@ class UserAlreadyExistsException(Exception):
 
 class InvalidCredentialsException(Exception):
     """Raised when credentials are invalid"""
+    pass
+
+class ValidationException(Exception):
+    """Raised when input validation fails"""
     pass 
