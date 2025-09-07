@@ -44,7 +44,7 @@ class ProjectsTableConfig:
     
     # Sample item structure (for reference - not used in table creation)
     SAMPLE_ITEM_STRUCTURE = {
-        "pk": "project-uuid-string",  # Primary key (maps to SQLAlchemy 'id')
+        "pk": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",  # Primary key (maps to SQLAlchemy 'id')
         "name": "Project Name",  # Required field
         "description": "Project description text",  # Optional field
         "created_by": "user-uuid-string",  # Required - creator user ID

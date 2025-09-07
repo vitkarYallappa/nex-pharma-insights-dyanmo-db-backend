@@ -20,5 +20,6 @@ from .content_insight_table import ContentInsightTableConfig
 from .content_implication_table import ContentImplicationTableConfig
 from .content_analysis_mapping_table import ContentAnalysisMappingTableConfig
 from .insight_comment_table import InsightCommentTableConfig
+from .implication_comment_table import ImplicationCommentTableConfig
 
-__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig", "ContentUrlMappingTableConfig", "ContentSummaryTableConfig", "ContentInsightTableConfig", "ContentImplicationTableConfig", "ContentAnalysisMappingTableConfig", "InsightCommentTableConfig"] 
+__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig", "ContentUrlMappingTableConfig", "ContentSummaryTableConfig", "ContentInsightTableConfig", "ContentImplicationTableConfig", "ContentAnalysisMappingTableConfig", "InsightCommentTableConfig", "ImplicationCommentTableConfig"] 

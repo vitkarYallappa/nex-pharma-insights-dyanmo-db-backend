@@ -1,32 +1,27 @@
 """
-Requests Table Configuration
-Dedicated configuration for the requests table schema and settings
+Implication Comment Table Configuration
+Dedicated configuration for the implication_comment table schema and settings
 Matches SQLAlchemy schema structure with DynamoDB NoSQL approach
 """
 
 from typing import Dict, Any
 
-class RequestsTableConfig:
-    """Configuration for the requests table"""
+class ImplicationCommentTableConfig:
+    """Configuration for the implication_comment table"""
     
     # Table name (without environment suffix)
-    TABLE_NAME = "requests"
+    TABLE_NAME = "implication_comment"
     
     # Field mapping from SQLAlchemy to DynamoDB
     # SQLAlchemy -> DynamoDB mapping:
     # id (UUID) -> pk (String) - Primary key
-    # project_id (UUID) -> project_id (String) - Project ID reference
-    # title (String) -> title (String) - Request title
-    # description (Text) -> description (String) - Request description
-    # time_range (JSON) -> time_range (Map) - Time range JSON
-    # priority (String) -> priority (String) - Request priority
-    # status (String) -> status (String) - Request status
-    # estimated_completion (DateTime) -> estimated_completion (String) - ISO timestamp
-    # created_by (UUID) -> created_by (String) - Creator user ID
+    # implication_id (UUID) -> implication_id (String) - Implication ID reference
+    # comment_text (Text) -> comment_text (String) - Comment text
+    # comment_type (String) -> comment_type (String) - Comment type
     # created_at (DateTime) -> created_at (String) - ISO timestamp
     # updated_at (DateTime) -> updated_at (String) - ISO timestamp
     
-    # Complete DynamoDB schema for requests table
+    # Complete DynamoDB schema for implication_comment table
     SCHEMA = {
         "table_name": TABLE_NAME,
         "key_schema": [
@@ -47,18 +42,9 @@ class RequestsTableConfig:
     # Sample item structure (for reference - not used in table creation)
     SAMPLE_ITEM = {
         "pk": "123e4567-e89b-12d3-a456-426614174000",  # Primary key (UUID as string)
-        "project_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",  # Project ID reference
-        "title": "Analyze Q4 Sales Data",  # Request title
-        "description": "Comprehensive analysis of Q4 sales performance across all regions",  # Request description
-        "time_range": {  # Time range as Map
-            "start_date": "2024-01-01",
-            "end_date": "2024-03-31",
-            "timezone": "UTC"
-        },
-        "priority": "high",  # Request priority
-        "status": "pending",  # Request status
-        "estimated_completion": "2024-12-15T18:00:00Z",  # ISO timestamp
-        "created_by": "456e7890-f12a-34b5-c678-901234567def",  # Creator user ID
+        "implication_id": "987fcdeb-51a2-43d7-8f9e-123456789abc",  # Implication ID reference
+        "comment_text": "This implication highlights critical regulatory considerations that could significantly impact our market entry strategy. The analysis suggests we need to adjust our compliance framework before proceeding with the product launch.",  # Comment text
+        "comment_type": "regulatory_feedback",  # Comment type
         "created_at": "2024-12-01T10:00:00Z",  # ISO timestamp
         "updated_at": "2024-12-01T12:00:00Z"   # ISO timestamp
     }
@@ -78,4 +64,4 @@ class RequestsTableConfig:
     @classmethod
     def get_description(cls) -> str:
         """Get table description"""
-        return "Requests table with primary key only - simple and fast" 
+        return "Implication comment table with primary key only - simple and fast" 
