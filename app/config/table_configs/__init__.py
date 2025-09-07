@@ -22,5 +22,6 @@ from .content_analysis_mapping_table import ContentAnalysisMappingTableConfig
 from .insight_comment_table import InsightCommentTableConfig
 from .implication_comment_table import ImplicationCommentTableConfig
 from .implication_qa_table import ImplicationQaTableConfig
+from .insight_qa_table import InsightQaTableConfig
 
-__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig", "ContentUrlMappingTableConfig", "ContentSummaryTableConfig", "ContentInsightTableConfig", "ContentImplicationTableConfig", "ContentAnalysisMappingTableConfig", "InsightCommentTableConfig", "ImplicationCommentTableConfig", "ImplicationQaTableConfig"] 
+__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig", "ContentUrlMappingTableConfig", "ContentSummaryTableConfig", "ContentInsightTableConfig", "ContentImplicationTableConfig", "ContentAnalysisMappingTableConfig", "InsightCommentTableConfig", "ImplicationCommentTableConfig", "ImplicationQaTableConfig", "InsightQaTableConfig"] 
