@@ -18,5 +18,6 @@ from .content_url_mapping_table import ContentUrlMappingTableConfig
 from .content_summary_table import ContentSummaryTableConfig
 from .content_insight_table import ContentInsightTableConfig
 from .content_implication_table import ContentImplicationTableConfig
+from .content_analysis_mapping_table import ContentAnalysisMappingTableConfig
 
-__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig", "ContentUrlMappingTableConfig", "ContentSummaryTableConfig", "ContentInsightTableConfig", "ContentImplicationTableConfig"] 
+__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig", "ContentUrlMappingTableConfig", "ContentSummaryTableConfig", "ContentInsightTableConfig", "ContentImplicationTableConfig", "ContentAnalysisMappingTableConfig"] 
