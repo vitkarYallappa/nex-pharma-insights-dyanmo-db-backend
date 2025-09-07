@@ -14,6 +14,7 @@ from app.core.database import dynamodb_client
 from app.routes.user_routes import router as user_router
 from app.routes.project_routes import router as project_router
 from app.routes.global_keywords_routes import router as global_keywords_router
+from app.routes.global_base_url_routes import router as global_base_url_router
 from app.routes.migration_routes import router as migration_router
 from app.routes.seeder_routes import router as seeder_router
 
@@ -85,6 +86,12 @@ app.include_router(
     tags=["Global Keywords"]
 )
 
+app.include_router(
+    global_base_url_router,
+    prefix="/api/v1/global-base-urls",
+    tags=["Global Base URLs"]
+)
+
 # Migration and Seeder Routes
 app.include_router(
     migration_router,
@@ -142,6 +149,8 @@ async def root() -> APIResponse:
         "endpoints": {
             "users": "/api/v1/users",
             "projects": "/api/v1/projects",
+            "global_keywords": "/api/v1/global-keywords",
+            "global_base_urls": "/api/v1/global-base-urls",
             "migrations": "/api/v1/migrations",
             "seeders": "/api/v1/seeders",
             "health": "/health",
