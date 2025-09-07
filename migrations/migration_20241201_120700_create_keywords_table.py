@@ -1,0 +1,72 @@
+"""
+Create Keywords Table Migration
+Created: 2024-12-01T12:07:00
+"""
+
+import sys
+from pathlib import Path
+
+# Add project root to path
+sys.path.append(str(Path(__file__).parent.parent))
+
+from migrations.migration_manager import BaseMigration
+from app.core.database import dynamodb_client
+from app.config.settings import settings
+from app.config.table_configs.keywords_table import KeywordsTableConfig
+from app.core.logging import get_logger
+
+logger = get_logger("migration.create_keywords_table")
+
+class CreateKeywordsTableMigration(BaseMigration):
+    """
+    Create Keywords Table Migration
+    Creates the keywords table with proper indexes
+    """
+    
+    @property
+    def description(self) -> str:
+        return "Create keywords table with primary key only"
+    
+    async def up(self):
+        """Execute the migration"""
+        logger.info("Creating keywords table migration")
+        
+        try:
+            # Get keywords table schema from configuration
+            keywords_schema = KeywordsTableConfig.SCHEMA
+            table_name = KeywordsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            
+            # Create the keywords table using schema configuration
+            table_created = dynamodb_client.create_table(
+                table_name=table_name,
+                key_schema=keywords_schema["key_schema"],
+                attribute_definitions=keywords_schema["attribute_definitions"],
+                billing_mode=keywords_schema["billing_mode"]
+            )
+            
+            if table_created:
+                logger.info(f"Successfully created keywords table: {table_name}")
+            else:
+                logger.info(f"Keywords table {table_name} already exists")
+                
+        except Exception as e:
+            logger.error(f"Error creating keywords table: {str(e)}")
+            raise
+    
+    async def down(self):
+        """Rollback the migration"""
+        logger.info("Rolling back keywords table creation")
+        
+        try:
+            # Delete the keywords table
+            table_name = KeywordsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_deleted = dynamodb_client.delete_table(table_name)
+            
+            if table_deleted:
+                logger.info(f"Successfully deleted keywords table: {table_name}")
+            else:
+                logger.warning(f"Keywords table {table_name} did not exist")
+                
+        except Exception as e:
+            logger.error(f"Error deleting keywords table: {str(e)}")
+            raise 

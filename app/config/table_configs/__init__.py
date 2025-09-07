@@ -10,5 +10,6 @@ from .project_modules_statistics_table import ProjectModulesStatisticsTableConfi
 from .requests_table import RequestsTableConfig
 from .global_keywords_table import GlobalKeywordsTableConfig
 from .global_base_urls_table import GlobalBaseUrlsTableConfig
+from .keywords_table import KeywordsTableConfig
 
-__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig"] 
+__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig"] 
