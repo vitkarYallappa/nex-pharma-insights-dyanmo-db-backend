@@ -29,7 +29,7 @@ class ContentSummaryRepository(BaseRepository):
         summaries_data = await super().find_all_by_query(query, limit)
         return [ContentSummaryModel.from_dict(data) for data in summaries_data]
     
-    async def get_all_projects(self, url_id: Optional[str] = None,
+    async def get_all_content_summary(self, url_id: Optional[str] = None,
                               content_id: Optional[str] = None,
                               is_canonical: Optional[bool] = None,
                               preferred_choice: Optional[bool] = None,
@@ -54,7 +54,7 @@ class ContentSummaryRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, summary_id: str, update_data: Dict[str, Any]) -> Optional[ContentSummaryModel]:
+    async def update_content_summary(self, summary_id: str, update_data: Dict[str, Any]) -> Optional[ContentSummaryModel]:
         """Update content summary entry by ID"""
         updated_data = await super().update_by_query({"pk": summary_id}, update_data)
         return ContentSummaryModel.from_dict(updated_data) if updated_data else None 

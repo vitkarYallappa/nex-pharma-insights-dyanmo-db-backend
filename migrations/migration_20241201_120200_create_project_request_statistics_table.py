@@ -49,6 +49,9 @@ class CreateProjectRequestStatisticsTableMigration(BaseMigration):
             else:
                 logger.info(f"Project_request_statistics table {table_name} already exists")
                 
+            # Add some initial data if needed
+            await self._create_initial_data()
+                
         except Exception as e:
             logger.error(f"Error creating project_request_statistics table: {str(e)}")
             raise
@@ -69,4 +72,57 @@ class CreateProjectRequestStatisticsTableMigration(BaseMigration):
                 
         except Exception as e:
             logger.error(f"Error deleting project_request_statistics table: {str(e)}")
-            raise 
+            raise
+    
+    async def _create_initial_data(self):
+        """Create initial test data for development"""
+        if not settings.is_development:
+            return
+            
+        logger.info("Creating initial test data for project request statistics")
+        
+        try:
+            from app.repositories.project_request_statistics_repository import ProjectRequestStatisticsRepository
+            from app.repositories.project_repository import ProjectRepository
+            from app.models.project_request_statistics_model import ProjectRequestStatisticsModel
+            from datetime import datetime, timedelta
+            import random
+            
+            stats_repo = ProjectRequestStatisticsRepository()
+            project_repo = ProjectRepository()
+            
+            # Get existing projects to create statistics for
+            projects = await project_repo.scan({})
+            
+            if projects:
+                for project in projects:
+                    # Check if statistics already exist for this project
+                    existing_stats = await stats_repo.scan({"project_id": project.pk})
+                    
+                    if not existing_stats:
+                        # Generate realistic statistics
+                        total_requests = random.randint(5, 50)
+                        completed_requests = random.randint(1, total_requests)
+                        pending_requests = random.randint(0, total_requests - completed_requests)
+                        failed_requests = total_requests - completed_requests - pending_requests
+                        
+                        statistics = ProjectRequestStatisticsModel.create_new(
+                            project_id=project.pk,
+                            total_requests=total_requests,
+                            completed_requests=completed_requests,
+                            pending_requests=pending_requests,
+                            failed_requests=failed_requests,
+                            average_processing_time=random.uniform(300, 3600),  # 5 minutes to 1 hour
+                            last_activity_at=(datetime.utcnow() - timedelta(hours=random.randint(1, 72))).isoformat(),
+                            statistics_metadata={
+                                "success_rate": round(completed_requests / total_requests * 100, 2),
+                                "peak_processing_hour": random.randint(9, 17),
+                                "most_common_request_type": random.choice(["analysis", "insight", "report"])
+                            }
+                        )
+                        
+                        await stats_repo.create(statistics)
+                        logger.info(f"Created statistics for project: {project.name}")
+                
+        except Exception as e:
+            logger.warning(f"Could not create initial project request statistics data: {str(e)}") 

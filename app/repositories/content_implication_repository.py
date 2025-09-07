@@ -29,7 +29,7 @@ class ContentImplicationRepository(BaseRepository):
         implications_data = await super().find_all_by_query(query, limit)
         return [ContentImplicationModel.from_dict(data) for data in implications_data]
     
-    async def get_all_projects(self, url_id: Optional[str] = None,
+    async def get_all_content_implication(self, url_id: Optional[str] = None,
                               content_id: Optional[str] = None,
                               implication_type: Optional[str] = None,
                               priority_level: Optional[str] = None,
@@ -60,7 +60,7 @@ class ContentImplicationRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, implication_id: str, update_data: Dict[str, Any]) -> Optional[ContentImplicationModel]:
+    async def update_content_implication(self, implication_id: str, update_data: Dict[str, Any]) -> Optional[ContentImplicationModel]:
         """Update content implication entry by ID"""
         updated_data = await super().update_by_query({"pk": implication_id}, update_data)
         return ContentImplicationModel.from_dict(updated_data) if updated_data else None 

@@ -29,7 +29,7 @@ class ProcessHandlingRepository(BaseRepository):
         processes_data = await super().find_all_by_query(query, limit)
         return [ProcessHandlingModel.from_dict(data) for data in processes_data]
     
-    async def get_all_projects(self, request_id: Optional[str] = None, 
+    async def get_all_process_handling(self, request_id: Optional[str] = None,
                               project_id: Optional[str] = None,
                               status: Optional[str] = None,
                               assigned_worker: Optional[str] = None,
@@ -51,7 +51,7 @@ class ProcessHandlingRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, process_id: str, update_data: Dict[str, Any]) -> Optional[ProcessHandlingModel]:
+    async def update_process_handling(self, process_id: str, update_data: Dict[str, Any]) -> Optional[ProcessHandlingModel]:
         """Update process handling entry by ID"""
         updated_data = await super().update_by_query({"pk": process_id}, update_data)
         return ProcessHandlingModel.from_dict(updated_data) if updated_data else None 

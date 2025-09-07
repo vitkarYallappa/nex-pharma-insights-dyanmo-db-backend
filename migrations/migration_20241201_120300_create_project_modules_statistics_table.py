@@ -49,6 +49,9 @@ class CreateProjectModulesStatisticsTableMigration(BaseMigration):
             else:
                 logger.info(f"Project_modules_statistics table {table_name} already exists")
                 
+            # Add some initial data if needed
+            await self._create_initial_data()
+                
         except Exception as e:
             logger.error(f"Error creating project_modules_statistics table: {str(e)}")
             raise
@@ -69,4 +72,48 @@ class CreateProjectModulesStatisticsTableMigration(BaseMigration):
                 
         except Exception as e:
             logger.error(f"Error deleting project_modules_statistics table: {str(e)}")
-            raise 
+            raise
+    
+    async def _create_initial_data(self):
+        """Create initial test data for development"""
+        if not settings.is_development:
+            return
+            
+        logger.info("Creating initial test data for project modules statistics")
+        
+        try:
+            from app.repositories.project_modules_statistics_repository import ProjectModulesStatisticsRepository
+            from app.repositories.project_repository import ProjectRepository
+            from app.models.project_modules_statistics_model import ProjectModulesStatisticsModel
+            import random
+            
+            stats_repo = ProjectModulesStatisticsRepository()
+            project_repo = ProjectRepository()
+            
+            # Get existing projects to create statistics for
+            projects = await project_repo.scan({})
+            
+            if projects:
+                for project in projects:
+                    # Check if statistics already exist for this project
+                    existing_stats = await stats_repo.scan({"project_id": project.pk})
+                    
+                    if not existing_stats:
+                        statistics = ProjectModulesStatisticsModel.create_new(
+                            project_id=project.pk,
+                            content_analysis_count=random.randint(10, 100),
+                            insight_generation_count=random.randint(5, 50),
+                            implication_analysis_count=random.randint(3, 30),
+                            total_processing_time=random.uniform(1800, 18000),  # 30 minutes to 5 hours
+                            statistics_metadata={
+                                "most_active_module": random.choice(["content_analysis", "insight_generation", "implication_analysis"]),
+                                "average_content_per_request": random.randint(5, 25),
+                                "success_rate": random.uniform(85.0, 99.0)
+                            }
+                        )
+                        
+                        await stats_repo.create(statistics)
+                        logger.info(f"Created module statistics for project: {project.name}")
+                
+        except Exception as e:
+            logger.warning(f"Could not create initial project modules statistics data: {str(e)}") 

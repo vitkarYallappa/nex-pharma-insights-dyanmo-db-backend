@@ -28,7 +28,7 @@ class ContentRepositoryService:
         self.content_repository = ContentRepositoryRepository()
         self.logger = logger
     
-    async def create_project(self, request_id: str, project_id: str, canonical_url: str, title: str,
+    async def create_content_repository(self, request_id: str, project_id: str, canonical_url: str, title: str,
                             content_hash: str, source_type: str, relevance_type: str,
                             version: Optional[int] = None, is_canonical: Optional[bool] = None) -> ContentRepositoryModel:
         """Create a new content repository entry"""
@@ -79,7 +79,7 @@ class ContentRepositoryService:
             self.logger.error(f"Create content repository entry failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, content_id: str) -> ContentRepositoryModel:
+    async def get_content_repository_by_id(self, content_id: str) -> ContentRepositoryModel:
         """Get content repository entry by ID"""
         try:
             if not content_id or not content_id.strip():
@@ -97,7 +97,7 @@ class ContentRepositoryService:
             self.logger.error(f"Get content repository entry by ID failed: {str(e)}")
             raise
     
-    async def get_projects_by_query(self, request_id: Optional[str] = None,
+    async def get_all_content_repository(self, request_id: Optional[str] = None,
                                    project_id: Optional[str] = None,
                                    source_type: Optional[str] = None,
                                    relevance_type: Optional[str] = None,
@@ -109,7 +109,7 @@ class ContentRepositoryService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            contents = await self.content_repository.get_all_projects(
+            contents = await self.content_repository.get_all_content_repository(
                 request_id=request_id.strip() if request_id else None,
                 project_id=project_id.strip() if project_id else None,
                 source_type=source_type.strip() if source_type else None,
@@ -127,14 +127,14 @@ class ContentRepositoryService:
             self.logger.error(f"Get content repository entries by query failed: {str(e)}")
             raise
     
-    async def update_project(self, content_id: str, update_data: Dict[str, Any]) -> ContentRepositoryModel:
+    async def update_content_repository(self, content_id: str, update_data: Dict[str, Any]) -> ContentRepositoryModel:
         """Update content repository entry by ID"""
         try:
             if not content_id or not content_id.strip():
                 raise ValidationException("Content ID is required")
             
             # Check if content exists
-            existing_content = await self.get_project_by_id(content_id)
+            existing_content = await self.get_content_repository_by_id(content_id)
             
             # Prepare update data (remove None values and add updated_at)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
@@ -142,7 +142,7 @@ class ContentRepositoryService:
                 from datetime import datetime
                 clean_update_data["updated_at"] = datetime.utcnow().isoformat()
             
-            updated_content = await self.content_repository.update_project(
+            updated_content = await self.content_repository.update_content_repository(
                 content_id.strip(), clean_update_data
             )
             

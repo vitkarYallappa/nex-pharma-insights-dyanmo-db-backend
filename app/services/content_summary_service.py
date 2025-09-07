@@ -28,7 +28,7 @@ class ContentSummaryService:
         self.summary_repository = ContentSummaryRepository()
         self.logger = logger
     
-    async def create_project(self, url_id: str, content_id: str, summary_text: str, summary_content_file_path: str,
+    async def create_content_summary(self, url_id: str, content_id: str, summary_text: str, summary_content_file_path: str,
                             confidence_score: Optional[float] = None, version: Optional[int] = None,
                             is_canonical: Optional[bool] = None, preferred_choice: Optional[bool] = None,
                             created_by: Optional[str] = None) -> ContentSummaryModel:
@@ -75,7 +75,7 @@ class ContentSummaryService:
             self.logger.error(f"Create content summary entry failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, summary_id: str) -> ContentSummaryModel:
+    async def get_content_summary_by_id(self, summary_id: str) -> ContentSummaryModel:
         """Get content summary entry by ID"""
         try:
             if not summary_id or not summary_id.strip():
@@ -106,7 +106,7 @@ class ContentSummaryService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            summaries = await self.summary_repository.get_all_projects(
+            summaries = await self.summary_repository.get_all_content_summary(
                 url_id=url_id.strip() if url_id else None,
                 content_id=content_id.strip() if content_id else None,
                 is_canonical=is_canonical,
@@ -125,14 +125,14 @@ class ContentSummaryService:
             self.logger.error(f"Get content summary entries by query failed: {str(e)}")
             raise
     
-    async def update_project(self, summary_id: str, update_data: Dict[str, Any]) -> ContentSummaryModel:
+    async def update_content_summary(self, summary_id: str, update_data: Dict[str, Any]) -> ContentSummaryModel:
         """Update content summary entry by ID"""
         try:
             if not summary_id or not summary_id.strip():
                 raise ValidationException("Summary ID is required")
             
             # Check if summary exists
-            existing_summary = await self.get_project_by_id(summary_id)
+            existing_summary = await self.get_content_summary_by_id(summary_id)
             
             # Validate confidence_score if being updated
             if "confidence_score" in update_data and update_data["confidence_score"] is not None:
@@ -143,7 +143,7 @@ class ContentSummaryService:
             # Prepare update data (remove None values)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
             
-            updated_summary = await self.summary_repository.update_project(
+            updated_summary = await self.summary_repository.update_content_summary(
                 summary_id.strip(), clean_update_data
             )
             
@@ -158,127 +158,3 @@ class ContentSummaryService:
         except Exception as e:
             self.logger.error(f"Update content summary entry failed: {str(e)}")
             raise
-    
-    async def mark_as_canonical(self, summary_id: str) -> ContentSummaryModel:
-        """Mark summary as canonical"""
-        try:
-            summary = await self.get_project_by_id(summary_id)
-            summary.mark_as_canonical()
-            
-            updated_summary = await self.summary_repository.update_project(
-                summary_id, summary.to_dict()
-            )
-            
-            if not updated_summary:
-                raise ContentSummaryNotFoundException(f"Failed to mark summary as canonical with ID {summary_id}")
-            
-            self.logger.info(f"Summary marked as canonical: {summary_id}")
-            return updated_summary
-            
-        except (ContentSummaryNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Mark summary as canonical failed: {str(e)}")
-            raise
-    
-    async def mark_as_preferred(self, summary_id: str) -> ContentSummaryModel:
-        """Mark summary as preferred choice"""
-        try:
-            summary = await self.get_project_by_id(summary_id)
-            summary.mark_as_preferred()
-            
-            updated_summary = await self.summary_repository.update_project(
-                summary_id, summary.to_dict()
-            )
-            
-            if not updated_summary:
-                raise ContentSummaryNotFoundException(f"Failed to mark summary as preferred with ID {summary_id}")
-            
-            self.logger.info(f"Summary marked as preferred: {summary_id}")
-            return updated_summary
-            
-        except (ContentSummaryNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Mark summary as preferred failed: {str(e)}")
-            raise
-    
-    async def update_confidence_score(self, summary_id: str, score: float) -> ContentSummaryModel:
-        """Update confidence score for summary"""
-        try:
-            if score < 0.0 or score > 1.0:
-                raise ValidationException("Confidence score must be between 0.0 and 1.0")
-            
-            summary = await self.get_project_by_id(summary_id)
-            summary.update_confidence(score)
-            
-            updated_summary = await self.summary_repository.update_project(
-                summary_id, summary.to_dict()
-            )
-            
-            if not updated_summary:
-                raise ContentSummaryNotFoundException(f"Failed to update confidence score for summary with ID {summary_id}")
-            
-            self.logger.info(f"Confidence score updated for summary: {summary_id} to {score}")
-            return updated_summary
-            
-        except (ContentSummaryNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Update confidence score failed: {str(e)}")
-            raise
-    
-    async def get_summaries_by_content(self, content_id: str, is_canonical: Optional[bool] = None) -> List[ContentSummaryModel]:
-        """Get all summaries for a specific content ID"""
-        try:
-            if not content_id or not content_id.strip():
-                raise ValidationException("Content ID is required")
-            
-            summaries = await self.summary_repository.get_all_projects(
-                content_id=content_id.strip(),
-                is_canonical=is_canonical
-            )
-            
-            self.logger.info(f"Retrieved {len(summaries)} summaries for content {content_id}")
-            return summaries
-            
-        except ValidationException:
-            raise
-        except Exception as e:
-            self.logger.error(f"Get summaries by content failed: {str(e)}")
-            raise
-    
-    async def get_summaries_by_url(self, url_id: str, preferred_choice: Optional[bool] = None) -> List[ContentSummaryModel]:
-        """Get all summaries for a specific URL ID"""
-        try:
-            if not url_id or not url_id.strip():
-                raise ValidationException("URL ID is required")
-            
-            summaries = await self.summary_repository.get_all_projects(
-                url_id=url_id.strip(),
-                preferred_choice=preferred_choice
-            )
-            
-            self.logger.info(f"Retrieved {len(summaries)} summaries for URL {url_id}")
-            return summaries
-            
-        except ValidationException:
-            raise
-        except Exception as e:
-            self.logger.error(f"Get summaries by URL failed: {str(e)}")
-            raise
-    
-    async def get_preferred_summaries(self, content_id: Optional[str] = None) -> List[ContentSummaryModel]:
-        """Get all preferred summaries, optionally filtered by content ID"""
-        try:
-            summaries = await self.summary_repository.get_all_projects(
-                content_id=content_id.strip() if content_id else None,
-                preferred_choice=True
-            )
-            
-            self.logger.info(f"Retrieved {len(summaries)} preferred summaries")
-            return summaries
-            
-        except Exception as e:
-            self.logger.error(f"Get preferred summaries failed: {str(e)}")
-            raise 

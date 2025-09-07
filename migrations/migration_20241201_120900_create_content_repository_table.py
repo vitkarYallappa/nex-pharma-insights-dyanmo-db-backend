@@ -49,6 +49,9 @@ class CreateContentRepositoryTableMigration(BaseMigration):
             else:
                 logger.info(f"Content_repository table {table_name} already exists")
                 
+            # Add some initial data if needed
+            await self._create_initial_data()
+                
         except Exception as e:
             logger.error(f"Error creating content_repository table: {str(e)}")
             raise
@@ -69,4 +72,88 @@ class CreateContentRepositoryTableMigration(BaseMigration):
                 
         except Exception as e:
             logger.error(f"Error deleting content_repository table: {str(e)}")
-            raise 
+            raise
+    
+    async def _create_initial_data(self):
+        """Create initial test data for development"""
+        if not settings.is_development:
+            return
+            
+        logger.info("Creating initial test data for content repository")
+        
+        try:
+            from app.repositories.content_repository_repository import ContentRepositoryRepository
+            from app.repositories.requests_repository import RequestsRepository
+            from app.models.content_repository_model import ContentRepositoryModel
+            import hashlib
+            import random
+            
+            content_repo = ContentRepositoryRepository()
+            requests_repo = RequestsRepository()
+            
+            # Get existing requests to create content for
+            requests = await requests_repo.scan({})
+            
+            if requests:
+                # Sample content data
+                sample_contents = [
+                    {
+                        "canonical_url": "https://pubmed.ncbi.nlm.nih.gov/12345678/",
+                        "title": "Efficacy and Safety of Novel Oncology Drug in Phase III Clinical Trial",
+                        "source_type": "medical_literature",
+                        "relevance_type": "high_relevance"
+                    },
+                    {
+                        "canonical_url": "https://clinicaltrials.gov/ct2/show/NCT12345678",
+                        "title": "Randomized Controlled Trial of Cardiovascular Drug Safety",
+                        "source_type": "clinical_trial",
+                        "relevance_type": "medium_relevance"
+                    },
+                    {
+                        "canonical_url": "https://www.fda.gov/drugs/drug-safety-and-availability/fda-drug-safety-communication",
+                        "title": "FDA Drug Safety Communication: New Safety Information",
+                        "source_type": "regulatory_document",
+                        "relevance_type": "high_relevance"
+                    },
+                    {
+                        "canonical_url": "https://www.ema.europa.eu/en/medicines/human/EPAR/example-drug",
+                        "title": "European Public Assessment Report for Example Drug",
+                        "source_type": "regulatory_document",
+                        "relevance_type": "medium_relevance"
+                    }
+                ]
+                
+                for i, request in enumerate(requests[:3]):  # Limit to first 3 requests
+                    # Create 2-3 content items per request
+                    contents_for_request = sample_contents[i:i+2] if i < len(sample_contents) else sample_contents[:2]
+                    
+                    for content_data in contents_for_request:
+                        # Generate content hash
+                        content_hash = hashlib.md5(
+                            f"{content_data['canonical_url']}{content_data['title']}".encode()
+                        ).hexdigest()
+                        
+                        # Check if content already exists
+                        existing_content = await content_repo.scan({
+                            "canonical_url": content_data["canonical_url"],
+                            "request_id": request.pk
+                        })
+                        
+                        if not existing_content:
+                            content = ContentRepositoryModel.create_new(
+                                request_id=request.pk,
+                                project_id=request.project_id,
+                                canonical_url=content_data["canonical_url"],
+                                title=content_data["title"],
+                                content_hash=content_hash,
+                                source_type=content_data["source_type"],
+                                relevance_type=content_data["relevance_type"],
+                                version=1,
+                                is_canonical=True
+                            )
+                            
+                            await content_repo.create(content)
+                            logger.info(f"Created content: {content_data['title'][:50]}... for request {request.title}")
+                
+        except Exception as e:
+            logger.warning(f"Could not create initial content repository data: {str(e)}") 

@@ -29,7 +29,7 @@ class InsightQaRepository(BaseRepository):
         qa_data_list = await super().find_all_by_query(query, limit)
         return [InsightQaModel.from_dict(data) for data in qa_data_list]
     
-    async def get_all_projects(self, insight_id: Optional[str] = None,
+    async def get_all_insight_qa(self, insight_id: Optional[str] = None,
                               question_type: Optional[str] = None,
                               limit: Optional[int] = None) -> List[InsightQaModel]:
         """Get all insight QA entries with optional filters"""
@@ -42,7 +42,7 @@ class InsightQaRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, qa_id: str, update_data: Dict[str, Any]) -> Optional[InsightQaModel]:
+    async def update_insight_qa(self, qa_id: str, update_data: Dict[str, Any]) -> Optional[InsightQaModel]:
         """Update insight QA entry by ID"""
         updated_data = await super().update_by_query({"pk": qa_id}, update_data)
         return InsightQaModel.from_dict(updated_data) if updated_data else None 

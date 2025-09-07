@@ -29,7 +29,7 @@ class GlobalKeywordsRepository(BaseRepository):
         keywords_data = await super().find_all_by_query(query, limit)
         return [GlobalKeywordsModel.from_dict(data) for data in keywords_data]
     
-    async def get_all_projects(self, keyword_type: Optional[str] = None, 
+    async def get_all_global_keyword(self, keyword_type: Optional[str] = None,
                               limit: Optional[int] = None) -> List[GlobalKeywordsModel]:
         """Get all global keywords with optional filters"""
         query = {}
@@ -39,7 +39,7 @@ class GlobalKeywordsRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, keyword_id: str, update_data: Dict[str, Any]) -> Optional[GlobalKeywordsModel]:
+    async def update_global_keyword(self, keyword_id: str, update_data: Dict[str, Any]) -> Optional[GlobalKeywordsModel]:
         """Update global keyword by ID"""
         updated_data = await super().update_by_query({"pk": keyword_id}, update_data)
         return GlobalKeywordsModel.from_dict(updated_data) if updated_data else None 

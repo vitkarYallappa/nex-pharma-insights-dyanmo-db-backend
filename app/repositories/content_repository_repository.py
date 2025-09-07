@@ -29,7 +29,7 @@ class ContentRepositoryRepository(BaseRepository):
         contents_data = await super().find_all_by_query(query, limit)
         return [ContentRepositoryModel.from_dict(data) for data in contents_data]
     
-    async def get_all_projects(self, request_id: Optional[str] = None, 
+    async def get_all_content_repository(self, request_id: Optional[str] = None,
                               project_id: Optional[str] = None,
                               source_type: Optional[str] = None,
                               relevance_type: Optional[str] = None,
@@ -51,7 +51,7 @@ class ContentRepositoryRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, content_id: str, update_data: Dict[str, Any]) -> Optional[ContentRepositoryModel]:
+    async def update_content_repository(self, content_id: str, update_data: Dict[str, Any]) -> Optional[ContentRepositoryModel]:
         """Update content repository entry by ID"""
         updated_data = await super().update_by_query({"pk": content_id}, update_data)
         return ContentRepositoryModel.from_dict(updated_data) if updated_data else None 

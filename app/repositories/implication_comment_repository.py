@@ -29,7 +29,7 @@ class ImplicationCommentRepository(BaseRepository):
         comments_data = await super().find_all_by_query(query, limit)
         return [ImplicationCommentModel.from_dict(data) for data in comments_data]
     
-    async def get_all_projects(self, implication_id: Optional[str] = None,
+    async def get_all_implication_comment(self, implication_id: Optional[str] = None,
                               comment_type: Optional[str] = None,
                               limit: Optional[int] = None) -> List[ImplicationCommentModel]:
         """Get all implication comment entries with optional filters"""
@@ -42,7 +42,7 @@ class ImplicationCommentRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, comment_id: str, update_data: Dict[str, Any]) -> Optional[ImplicationCommentModel]:
+    async def update_implication_comment(self, comment_id: str, update_data: Dict[str, Any]) -> Optional[ImplicationCommentModel]:
         """Update implication comment entry by ID"""
         updated_data = await super().update_by_query({"pk": comment_id}, update_data)
         return ImplicationCommentModel.from_dict(updated_data) if updated_data else None 

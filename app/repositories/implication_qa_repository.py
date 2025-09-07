@@ -29,7 +29,7 @@ class ImplicationQaRepository(BaseRepository):
         qa_data_list = await super().find_all_by_query(query, limit)
         return [ImplicationQaModel.from_dict(data) for data in qa_data_list]
     
-    async def get_all_projects(self, implication_id: Optional[str] = None,
+    async def get_all_implication_qa(self, implication_id: Optional[str] = None,
                               question_type: Optional[str] = None,
                               limit: Optional[int] = None) -> List[ImplicationQaModel]:
         """Get all implication QA entries with optional filters"""
@@ -42,7 +42,7 @@ class ImplicationQaRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, qa_id: str, update_data: Dict[str, Any]) -> Optional[ImplicationQaModel]:
+    async def update_implication_qa(self, qa_id: str, update_data: Dict[str, Any]) -> Optional[ImplicationQaModel]:
         """Update implication QA entry by ID"""
         updated_data = await super().update_by_query({"pk": qa_id}, update_data)
         return ImplicationQaModel.from_dict(updated_data) if updated_data else None 

@@ -29,7 +29,7 @@ class ContentInsightRepository(BaseRepository):
         insights_data = await super().find_all_by_query(query, limit)
         return [ContentInsightModel.from_dict(data) for data in insights_data]
     
-    async def get_all_projects(self, url_id: Optional[str] = None,
+    async def get_all_content_insight(self, url_id: Optional[str] = None,
                               content_id: Optional[str] = None,
                               insight_category: Optional[str] = None,
                               is_canonical: Optional[bool] = None,
@@ -57,7 +57,7 @@ class ContentInsightRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, insight_id: str, update_data: Dict[str, Any]) -> Optional[ContentInsightModel]:
+    async def update_content_insight(self, insight_id: str, update_data: Dict[str, Any]) -> Optional[ContentInsightModel]:
         """Update content insight entry by ID"""
         updated_data = await super().update_by_query({"pk": insight_id}, update_data)
         return ContentInsightModel.from_dict(updated_data) if updated_data else None 

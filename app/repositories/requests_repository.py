@@ -29,7 +29,7 @@ class RequestsRepository(BaseRepository):
         requests_data = await super().find_all_by_query(query, limit)
         return [RequestsModel.from_dict(data) for data in requests_data]
     
-    async def get_all_projects(self, project_id: Optional[str] = None, 
+    async def get_all_requests(self, project_id: Optional[str] = None,
                               status: Optional[str] = None,
                               priority: Optional[str] = None,
                               created_by: Optional[str] = None,
@@ -48,7 +48,7 @@ class RequestsRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, request_id: str, update_data: Dict[str, Any]) -> Optional[RequestsModel]:
+    async def update_request(self, request_id: str, update_data: Dict[str, Any]) -> Optional[RequestsModel]:
         """Update request by ID"""
         updated_data = await super().update_by_query({"pk": request_id}, update_data)
         return RequestsModel.from_dict(updated_data) if updated_data else None 

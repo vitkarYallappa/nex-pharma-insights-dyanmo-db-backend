@@ -28,7 +28,7 @@ class GlobalKeywordsService:
         self.keywords_repository = GlobalKeywordsRepository()
         self.logger = logger
     
-    async def create_project(self, keyword: str, keyword_type: Optional[str] = None) -> GlobalKeywordsModel:
+    async def create_global_keyword(self, keyword: str, keyword_type: Optional[str] = None) -> GlobalKeywordsModel:
         """Create a new global keyword"""
         try:
             # Validate required fields
@@ -52,7 +52,7 @@ class GlobalKeywordsService:
             self.logger.error(f"Create global keyword failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, keyword_id: str) -> GlobalKeywordsModel:
+    async def get_global_keyword_by_id(self, keyword_id: str) -> GlobalKeywordsModel:
         """Get global keyword by ID"""
         try:
             if not keyword_id or not keyword_id.strip():
@@ -70,7 +70,7 @@ class GlobalKeywordsService:
             self.logger.error(f"Get global keyword by ID failed: {str(e)}")
             raise
     
-    async def get_projects_by_query(self, keyword_type: Optional[str] = None,
+    async def get_all_global_keyword(self, keyword_type: Optional[str] = None,
                                    limit: Optional[int] = None) -> List[GlobalKeywordsModel]:
         """Get global keywords with optional filters"""
         try:
@@ -78,7 +78,7 @@ class GlobalKeywordsService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            keywords = await self.keywords_repository.get_all_projects(
+            keywords = await self.keywords_repository.get_all_global_keyword(
                 keyword_type=keyword_type.strip() if keyword_type else None,
                 limit=limit
             )
@@ -92,14 +92,14 @@ class GlobalKeywordsService:
             self.logger.error(f"Get global keywords by query failed: {str(e)}")
             raise
     
-    async def update_project(self, keyword_id: str, update_data: Dict[str, Any]) -> GlobalKeywordsModel:
+    async def update_global_keyword(self, keyword_id: str, update_data: Dict[str, Any]) -> GlobalKeywordsModel:
         """Update global keyword by ID"""
         try:
             if not keyword_id or not keyword_id.strip():
                 raise ValidationException("Keyword ID is required")
             
             # Check if keyword exists
-            existing_keyword = await self.get_project_by_id(keyword_id)
+            existing_keyword = await self.get_global_keyword_by_id(keyword_id)
             
             # Prepare update data (remove None values and add updated_at)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
@@ -107,7 +107,7 @@ class GlobalKeywordsService:
                 from datetime import datetime
                 clean_update_data["updated_at"] = datetime.utcnow().isoformat()
             
-            updated_keyword = await self.keywords_repository.update_project(
+            updated_keyword = await self.keywords_repository.update_global_keyword(
                 keyword_id.strip(), clean_update_data
             )
             

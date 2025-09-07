@@ -29,7 +29,7 @@ class GlobalBaseUrlsRepository(BaseRepository):
         urls_data = await super().find_all_by_query(query, limit)
         return [GlobalBaseUrlsModel.from_dict(data) for data in urls_data]
     
-    async def get_all_projects(self, source_name: Optional[str] = None, 
+    async def get_all_global_base_url(self, source_name: Optional[str] = None,
                               source_type: Optional[str] = None,
                               country_region: Optional[str] = None,
                               is_active: Optional[bool] = None,
@@ -48,7 +48,7 @@ class GlobalBaseUrlsRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, url_id: str, update_data: Dict[str, Any]) -> Optional[GlobalBaseUrlsModel]:
+    async def update_global_base_url(self, url_id: str, update_data: Dict[str, Any]) -> Optional[GlobalBaseUrlsModel]:
         """Update global base URL by ID"""
         updated_data = await super().update_by_query({"pk": url_id}, update_data)
         return GlobalBaseUrlsModel.from_dict(updated_data) if updated_data else None 

@@ -29,7 +29,7 @@ class ContentUrlMappingRepository(BaseRepository):
         mappings_data = await super().find_all_by_query(query, limit)
         return [ContentUrlMappingModel.from_dict(data) for data in mappings_data]
     
-    async def get_all_projects(self, content_id: Optional[str] = None,
+    async def get_all_content_url_mapping(self, content_id: Optional[str] = None,
                               source_domain: Optional[str] = None,
                               is_canonical: Optional[bool] = None,
                               dedup_method: Optional[str] = None,
@@ -48,7 +48,7 @@ class ContentUrlMappingRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, url_id: str, update_data: Dict[str, Any]) -> Optional[ContentUrlMappingModel]:
+    async def update_content_url_mapping(self, url_id: str, update_data: Dict[str, Any]) -> Optional[ContentUrlMappingModel]:
         """Update content URL mapping entry by ID"""
         updated_data = await super().update_by_query({"pk": url_id}, update_data)
         return ContentUrlMappingModel.from_dict(updated_data) if updated_data else None 

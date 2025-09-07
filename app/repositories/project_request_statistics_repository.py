@@ -29,7 +29,7 @@ class ProjectRequestStatisticsRepository(BaseRepository):
         statistics_data = await super().find_all_by_query(query, limit)
         return [ProjectRequestStatisticsModel.from_dict(data) for data in statistics_data]
     
-    async def get_all_projects(self, project_id: Optional[str] = None, 
+    async def get_all_project_request_statistics(self, project_id: Optional[str] = None,
                               limit: Optional[int] = None) -> List[ProjectRequestStatisticsModel]:
         """Get all project request statistics with optional filters"""
         query = {}
@@ -39,7 +39,7 @@ class ProjectRequestStatisticsRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, statistics_id: str, update_data: Dict[str, Any]) -> Optional[ProjectRequestStatisticsModel]:
+    async def update_project_request_statistics(self, statistics_id: str, update_data: Dict[str, Any]) -> Optional[ProjectRequestStatisticsModel]:
         """Update project request statistics by ID"""
         updated_data = await super().update_by_query({"pk": statistics_id}, update_data)
         return ProjectRequestStatisticsModel.from_dict(updated_data) if updated_data else None 

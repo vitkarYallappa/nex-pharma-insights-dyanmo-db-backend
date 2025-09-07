@@ -49,6 +49,10 @@ class CreateContentInsightTableMigration(BaseMigration):
             else:
                 logger.info(f"Content_insight table {table_name} already exists")
                 
+        
+            # Add some initial data if needed
+            await self._create_initial_data()
+                
         except Exception as e:
             logger.error(f"Error creating content_insight table: {str(e)}")
             raise
@@ -69,4 +73,18 @@ class CreateContentInsightTableMigration(BaseMigration):
                 
         except Exception as e:
             logger.error(f"Error deleting content_insight table: {str(e)}")
-            raise 
+            raise
+    async def _create_initial_data(self):
+        """Create initial test data for development"""
+        if not settings.is_development:
+            return
+            
+        logger.info("Creating initial test data")
+        
+        try:
+            # Placeholder for content-related tables
+            # Actual implementation would depend on the specific table structure
+            logger.info("Initial data creation placeholder - table ready for use")
+                
+        except Exception as e:
+            logger.warning(f"Could not create initial data: {str(e)}") 

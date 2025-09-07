@@ -62,7 +62,7 @@ class SourceUrlsService:
             self.logger.error(f"Create source URL failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, url_id: str) -> SourceUrlsModel:
+    async def get_source_urls_by_id(self, url_id: str) -> SourceUrlsModel:
         """Get source URL by ID"""
         try:
             if not url_id or not url_id.strip():
@@ -80,7 +80,7 @@ class SourceUrlsService:
             self.logger.error(f"Get source URL by ID failed: {str(e)}")
             raise
     
-    async def get_projects_by_query(self, request_id: Optional[str] = None,
+    async def get_source_urls_by_query(self, request_id: Optional[str] = None,
                                    source_name: Optional[str] = None,
                                    source_type: Optional[str] = None,
                                    country_region: Optional[str] = None,
@@ -92,7 +92,7 @@ class SourceUrlsService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            urls = await self.urls_repository.get_all_projects(
+            urls = await self.urls_repository.get_all_source_urls(
                 request_id=request_id.strip() if request_id else None,
                 source_name=source_name.strip() if source_name else None,
                 source_type=source_type.strip() if source_type else None,
@@ -110,14 +110,14 @@ class SourceUrlsService:
             self.logger.error(f"Get source URLs by query failed: {str(e)}")
             raise
     
-    async def update_project(self, url_id: str, update_data: Dict[str, Any]) -> SourceUrlsModel:
+    async def update_source_urls(self, url_id: str, update_data: Dict[str, Any]) -> SourceUrlsModel:
         """Update source URL by ID"""
         try:
             if not url_id or not url_id.strip():
                 raise ValidationException("URL ID is required")
             
             # Check if URL exists
-            existing_url = await self.get_project_by_id(url_id)
+            existing_url = await self.get_source_urls_by_id(url_id)
             
             # Prepare update data (remove None values and add updated_at)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
@@ -125,7 +125,7 @@ class SourceUrlsService:
                 from datetime import datetime
                 clean_update_data["updated_at"] = datetime.utcnow().isoformat()
             
-            updated_url = await self.urls_repository.update_project(
+            updated_url = await self.urls_repository.update_source_urls(
                 url_id.strip(), clean_update_data
             )
             

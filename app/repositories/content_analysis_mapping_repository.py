@@ -29,7 +29,7 @@ class ContentAnalysisMappingRepository(BaseRepository):
         mappings_data = await super().find_all_by_query(query, limit)
         return [ContentAnalysisMappingModel.from_dict(data) for data in mappings_data]
     
-    async def get_all_projects(self, content_id: Optional[str] = None,
+    async def get_all_analysis_mapping(self, content_id: Optional[str] = None,
                               primary_summary_id: Optional[str] = None,
                               primary_insight_id: Optional[str] = None,
                               primary_implication_id: Optional[str] = None,
@@ -63,7 +63,7 @@ class ContentAnalysisMappingRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, mapping_id: str, update_data: Dict[str, Any]) -> Optional[ContentAnalysisMappingModel]:
+    async def update_analysis_mapping(self, mapping_id: str, update_data: Dict[str, Any]) -> Optional[ContentAnalysisMappingModel]:
         """Update content analysis mapping entry by ID"""
         updated_data = await super().update_by_query({"pk": mapping_id}, update_data)
         return ContentAnalysisMappingModel.from_dict(updated_data) if updated_data else None 

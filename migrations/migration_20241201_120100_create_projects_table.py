@@ -49,6 +49,9 @@ class CreateProjectsTableMigration(BaseMigration):
             else:
                 logger.info(f"Projects_details table {table_name} already exists")
                 
+            # Add some initial data if needed
+            await self._create_initial_data()
+                
         except Exception as e:
             logger.error(f"Error creating projects_details table: {str(e)}")
             raise
@@ -69,4 +72,89 @@ class CreateProjectsTableMigration(BaseMigration):
                 
         except Exception as e:
             logger.error(f"Error deleting projects_details table: {str(e)}")
-            raise 
+            raise
+    
+    async def _create_initial_data(self):
+        """Create initial test data for development"""
+        if not settings.is_development:
+            return
+            
+        logger.info("Creating initial test data for projects")
+        
+        try:
+            from app.repositories.project_repository import ProjectRepository
+            from app.models.project_model import ProjectModel
+            
+            project_repo = ProjectRepository()
+            
+            # Sample projects data
+            sample_projects = [
+                {
+                    "name": "Pharma Research Project Alpha",
+                    "description": "Research project focused on drug discovery and analysis",
+                    "created_by": "admin@example.com",  # Will be replaced with actual user ID
+                    "status": "active",
+                    "project_metadata": {
+                        "research_area": "oncology",
+                        "priority": "high",
+                        "budget": 500000
+                    },
+                    "module_config": {
+                        "content_analysis": True,
+                        "insight_generation": True,
+                        "implication_analysis": True
+                    }
+                },
+                {
+                    "name": "Clinical Trial Data Analysis",
+                    "description": "Analysis of clinical trial data for new pharmaceutical compounds",
+                    "created_by": "test@example.com",  # Will be replaced with actual user ID
+                    "status": "active",
+                    "project_metadata": {
+                        "research_area": "cardiology",
+                        "priority": "medium",
+                        "budget": 300000
+                    },
+                    "module_config": {
+                        "content_analysis": True,
+                        "insight_generation": False,
+                        "implication_analysis": True
+                    }
+                },
+                {
+                    "name": "Drug Safety Monitoring",
+                    "description": "Monitoring and analysis of drug safety data from multiple sources",
+                    "created_by": "admin@example.com",
+                    "status": "planning",
+                    "project_metadata": {
+                        "research_area": "pharmacovigilance",
+                        "priority": "high",
+                        "budget": 750000
+                    },
+                    "module_config": {
+                        "content_analysis": True,
+                        "insight_generation": True,
+                        "implication_analysis": True
+                    }
+                }
+            ]
+            
+            for project_data in sample_projects:
+                # Check if project already exists (by name)
+                existing_projects = await project_repo.scan({"name": project_data["name"]})
+                
+                if not existing_projects:
+                    project = ProjectModel.create_new(
+                        name=project_data["name"],
+                        description=project_data["description"],
+                        created_by=project_data["created_by"],
+                        status=project_data["status"],
+                        project_metadata=project_data["project_metadata"],
+                        module_config=project_data["module_config"]
+                    )
+                    
+                    await project_repo.create(project)
+                    logger.info(f"Created sample project: {project_data['name']}")
+                
+        except Exception as e:
+            logger.warning(f"Could not create initial project data: {str(e)}") 

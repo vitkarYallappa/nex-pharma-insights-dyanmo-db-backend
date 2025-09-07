@@ -49,6 +49,9 @@ class CreateProcessHandlingTableMigration(BaseMigration):
             else:
                 logger.info(f"Process_handling table {table_name} already exists")
                 
+            # Add some initial data if needed
+            await self._create_initial_data()
+                
         except Exception as e:
             logger.error(f"Error creating process_handling table: {str(e)}")
             raise
@@ -69,4 +72,53 @@ class CreateProcessHandlingTableMigration(BaseMigration):
                 
         except Exception as e:
             logger.error(f"Error deleting process_handling table: {str(e)}")
-            raise 
+            raise
+    
+    async def _create_initial_data(self):
+        """Create initial test data for development"""
+        if not settings.is_development:
+            return
+            
+        logger.info("Creating initial test data for process handling")
+        
+        try:
+            from app.repositories.process_handling_repository import ProcessHandlingRepository
+            from app.repositories.requests_repository import RequestsRepository
+            from app.models.process_handling_model import ProcessHandlingModel
+            from datetime import datetime, timedelta
+            import random
+            
+            process_repo = ProcessHandlingRepository()
+            requests_repo = RequestsRepository()
+            
+            # Get existing requests to create process handling records for
+            requests = await requests_repo.scan({})
+            
+            if requests:
+                for request in requests[:3]:  # Limit to first 3 requests
+                    # Check if process handling already exists for this request
+                    existing_processes = await process_repo.scan({"request_id": request.pk})
+                    
+                    if not existing_processes:
+                        process = ProcessHandlingModel.create_new(
+                            request_id=request.pk,
+                            project_id=request.project_id,
+                            process_type=random.choice(["content_analysis", "insight_generation", "implication_analysis"]),
+                            process_status=random.choice(["pending", "running", "completed", "failed"]),
+                            priority_level=random.choice(["low", "medium", "high"]),
+                            estimated_completion_time=(datetime.utcnow() + timedelta(hours=random.randint(1, 24))).isoformat(),
+                            process_metadata={
+                                "worker_id": f"worker_{random.randint(1, 10)}",
+                                "retry_count": random.randint(0, 3),
+                                "resource_usage": {
+                                    "cpu_percent": random.uniform(10, 80),
+                                    "memory_mb": random.randint(100, 2000)
+                                }
+                            }
+                        )
+                        
+                        await process_repo.create(process)
+                        logger.info(f"Created process handling record for request: {request.title}")
+                
+        except Exception as e:
+            logger.warning(f"Could not create initial process handling data: {str(e)}") 

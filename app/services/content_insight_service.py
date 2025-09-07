@@ -28,7 +28,7 @@ class ContentInsightService:
         self.insight_repository = ContentInsightRepository()
         self.logger = logger
     
-    async def create_project(self, url_id: str, content_id: str, insight_text: str, insight_content_file_path: str,
+    async def create_content_insight(self, url_id: str, content_id: str, insight_text: str, insight_content_file_path: str,
                             insight_category: Optional[str] = None, confidence_score: Optional[float] = None,
                             version: Optional[int] = None, is_canonical: Optional[bool] = None,
                             preferred_choice: Optional[bool] = None, created_by: Optional[str] = None) -> ContentInsightModel:
@@ -76,7 +76,7 @@ class ContentInsightService:
             self.logger.error(f"Create content insight entry failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, insight_id: str) -> ContentInsightModel:
+    async def get_content_insight_by_id(self, insight_id: str) -> ContentInsightModel:
         """Get content insight entry by ID"""
         try:
             if not insight_id or not insight_id.strip():
@@ -94,7 +94,7 @@ class ContentInsightService:
             self.logger.error(f"Get content insight entry by ID failed: {str(e)}")
             raise
     
-    async def get_projects_by_query(self, url_id: Optional[str] = None,
+    async def get_content_insight_by_query(self, url_id: Optional[str] = None,
                                    content_id: Optional[str] = None,
                                    insight_category: Optional[str] = None,
                                    is_canonical: Optional[bool] = None,
@@ -108,7 +108,7 @@ class ContentInsightService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            insights = await self.insight_repository.get_all_projects(
+            insights = await self.insight_repository.get_all_content_insight(
                 url_id=url_id.strip() if url_id else None,
                 content_id=content_id.strip() if content_id else None,
                 insight_category=insight_category.strip() if insight_category else None,
@@ -128,14 +128,14 @@ class ContentInsightService:
             self.logger.error(f"Get content insight entries by query failed: {str(e)}")
             raise
     
-    async def update_project(self, insight_id: str, update_data: Dict[str, Any]) -> ContentInsightModel:
+    async def update_content_insight(self, insight_id: str, update_data: Dict[str, Any]) -> ContentInsightModel:
         """Update content insight entry by ID"""
         try:
             if not insight_id or not insight_id.strip():
                 raise ValidationException("Insight ID is required")
             
             # Check if insight exists
-            existing_insight = await self.get_project_by_id(insight_id)
+            existing_insight = await self.get_content_insight_by_id(insight_id)
             
             # Validate confidence_score if being updated
             if "confidence_score" in update_data and update_data["confidence_score"] is not None:
@@ -146,7 +146,7 @@ class ContentInsightService:
             # Prepare update data (remove None values)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
             
-            updated_insight = await self.insight_repository.update_project(
+            updated_insight = await self.insight_repository.update_content_insight(
                 insight_id.strip(), clean_update_data
             )
             
@@ -162,173 +162,3 @@ class ContentInsightService:
             self.logger.error(f"Update content insight entry failed: {str(e)}")
             raise
     
-    async def mark_as_canonical(self, insight_id: str) -> ContentInsightModel:
-        """Mark insight as canonical"""
-        try:
-            insight = await self.get_project_by_id(insight_id)
-            insight.mark_as_canonical()
-            
-            updated_insight = await self.insight_repository.update_project(
-                insight_id, insight.to_dict()
-            )
-            
-            if not updated_insight:
-                raise ContentInsightNotFoundException(f"Failed to mark insight as canonical with ID {insight_id}")
-            
-            self.logger.info(f"Insight marked as canonical: {insight_id}")
-            return updated_insight
-            
-        except (ContentInsightNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Mark insight as canonical failed: {str(e)}")
-            raise
-    
-    async def mark_as_preferred(self, insight_id: str) -> ContentInsightModel:
-        """Mark insight as preferred choice"""
-        try:
-            insight = await self.get_project_by_id(insight_id)
-            insight.mark_as_preferred()
-            
-            updated_insight = await self.insight_repository.update_project(
-                insight_id, insight.to_dict()
-            )
-            
-            if not updated_insight:
-                raise ContentInsightNotFoundException(f"Failed to mark insight as preferred with ID {insight_id}")
-            
-            self.logger.info(f"Insight marked as preferred: {insight_id}")
-            return updated_insight
-            
-        except (ContentInsightNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Mark insight as preferred failed: {str(e)}")
-            raise
-    
-    async def update_confidence_score(self, insight_id: str, score: float) -> ContentInsightModel:
-        """Update confidence score for insight"""
-        try:
-            if score < 0.0 or score > 1.0:
-                raise ValidationException("Confidence score must be between 0.0 and 1.0")
-            
-            insight = await self.get_project_by_id(insight_id)
-            insight.update_confidence(score)
-            
-            updated_insight = await self.insight_repository.update_project(
-                insight_id, insight.to_dict()
-            )
-            
-            if not updated_insight:
-                raise ContentInsightNotFoundException(f"Failed to update confidence score for insight with ID {insight_id}")
-            
-            self.logger.info(f"Confidence score updated for insight: {insight_id} to {score}")
-            return updated_insight
-            
-        except (ContentInsightNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Update confidence score failed: {str(e)}")
-            raise
-    
-    async def update_category(self, insight_id: str, category: str) -> ContentInsightModel:
-        """Update insight category"""
-        try:
-            if not category or not category.strip():
-                raise ValidationException("Category is required")
-            
-            insight = await self.get_project_by_id(insight_id)
-            insight.update_category(category.strip())
-            
-            updated_insight = await self.insight_repository.update_project(
-                insight_id, insight.to_dict()
-            )
-            
-            if not updated_insight:
-                raise ContentInsightNotFoundException(f"Failed to update category for insight with ID {insight_id}")
-            
-            self.logger.info(f"Category updated for insight: {insight_id} to {category}")
-            return updated_insight
-            
-        except (ContentInsightNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Update category failed: {str(e)}")
-            raise
-    
-    async def get_insights_by_content(self, content_id: str, insight_category: Optional[str] = None,
-                                     is_canonical: Optional[bool] = None) -> List[ContentInsightModel]:
-        """Get all insights for a specific content ID"""
-        try:
-            if not content_id or not content_id.strip():
-                raise ValidationException("Content ID is required")
-            
-            insights = await self.insight_repository.get_all_projects(
-                content_id=content_id.strip(),
-                insight_category=insight_category.strip() if insight_category else None,
-                is_canonical=is_canonical
-            )
-            
-            self.logger.info(f"Retrieved {len(insights)} insights for content {content_id}")
-            return insights
-            
-        except ValidationException:
-            raise
-        except Exception as e:
-            self.logger.error(f"Get insights by content failed: {str(e)}")
-            raise
-    
-    async def get_insights_by_url(self, url_id: str, preferred_choice: Optional[bool] = None) -> List[ContentInsightModel]:
-        """Get all insights for a specific URL ID"""
-        try:
-            if not url_id or not url_id.strip():
-                raise ValidationException("URL ID is required")
-            
-            insights = await self.insight_repository.get_all_projects(
-                url_id=url_id.strip(),
-                preferred_choice=preferred_choice
-            )
-            
-            self.logger.info(f"Retrieved {len(insights)} insights for URL {url_id}")
-            return insights
-            
-        except ValidationException:
-            raise
-        except Exception as e:
-            self.logger.error(f"Get insights by URL failed: {str(e)}")
-            raise
-    
-    async def get_insights_by_category(self, insight_category: str, content_id: Optional[str] = None) -> List[ContentInsightModel]:
-        """Get all insights for a specific category"""
-        try:
-            if not insight_category or not insight_category.strip():
-                raise ValidationException("Insight category is required")
-            
-            insights = await self.insight_repository.get_all_projects(
-                insight_category=insight_category.strip(),
-                content_id=content_id.strip() if content_id else None
-            )
-            
-            self.logger.info(f"Retrieved {len(insights)} insights for category {insight_category}")
-            return insights
-            
-        except ValidationException:
-            raise
-        except Exception as e:
-            self.logger.error(f"Get insights by category failed: {str(e)}")
-            raise
-    
-    async def get_preferred_insights(self, content_id: Optional[str] = None) -> List[ContentInsightModel]:
-        """Get all preferred insights, optionally filtered by content ID"""
-        try:
-            insights = await self.insight_repository.get_all_projects(
-                content_id=content_id.strip() if content_id else None,
-                preferred_choice=True
-            )
-            
-            self.logger.info(f"Retrieved {len(insights)} preferred insights")
-            return insights
-            
-        except Exception as e:
-            self.logger.error(f"Get preferred insights failed: {str(e)}")
-            raise 

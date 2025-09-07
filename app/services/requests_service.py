@@ -28,7 +28,7 @@ class RequestsService:
         self.requests_repository = RequestsRepository()
         self.logger = logger
     
-    async def create_project(self, project_id: str, title: str, created_by: str, description: Optional[str] = None,
+    async def create_request(self, project_id: str, title: str, created_by: str, description: Optional[str] = None,
                             time_range: Optional[Dict[str, Any]] = None, priority: Optional[str] = None,
                             status: Optional[str] = None, estimated_completion: Optional[str] = None) -> RequestsModel:
         """Create a new request"""
@@ -66,7 +66,7 @@ class RequestsService:
             self.logger.error(f"Create request failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, request_id: str) -> RequestsModel:
+    async def get_request_by_id(self, request_id: str) -> RequestsModel:
         """Get request by ID"""
         try:
             if not request_id or not request_id.strip():
@@ -84,7 +84,7 @@ class RequestsService:
             self.logger.error(f"Get request by ID failed: {str(e)}")
             raise
     
-    async def get_projects_by_query(self, project_id: Optional[str] = None,
+    async def get_request_by_query(self, project_id: Optional[str] = None,
                                    status: Optional[str] = None,
                                    priority: Optional[str] = None,
                                    created_by: Optional[str] = None,
@@ -95,7 +95,7 @@ class RequestsService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            requests = await self.requests_repository.get_all_projects(
+            requests = await self.requests_repository.get_all_requests(
                 project_id=project_id.strip() if project_id else None,
                 status=status.strip() if status else None,
                 priority=priority.strip() if priority else None,
@@ -112,14 +112,14 @@ class RequestsService:
             self.logger.error(f"Get requests by query failed: {str(e)}")
             raise
     
-    async def update_project(self, request_id: str, update_data: Dict[str, Any]) -> RequestsModel:
+    async def update_request(self, request_id: str, update_data: Dict[str, Any]) -> RequestsModel:
         """Update request by ID"""
         try:
             if not request_id or not request_id.strip():
                 raise ValidationException("Request ID is required")
             
             # Check if request exists
-            existing_request = await self.get_project_by_id(request_id)
+            existing_request = await self.get_request_by_id(request_id)
             
             # Prepare update data (remove None values and add updated_at)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
@@ -127,7 +127,7 @@ class RequestsService:
                 from datetime import datetime
                 clean_update_data["updated_at"] = datetime.utcnow().isoformat()
             
-            updated_request = await self.requests_repository.update_project(
+            updated_request = await self.requests_repository.update_request(
                 request_id.strip(), clean_update_data
             )
             

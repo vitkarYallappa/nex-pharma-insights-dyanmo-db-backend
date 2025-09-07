@@ -28,7 +28,7 @@ class ProcessHandlingService:
         self.process_repository = ProcessHandlingRepository()
         self.logger = logger
     
-    async def create_project(self, request_id: str, project_id: str, status: str,
+    async def create_process_handling(self, request_id: str, project_id: str, status: str,
                             priority: Optional[int] = None, total_records_expected: Optional[int] = None,
                             processing_notes: Optional[str] = None, assigned_worker: Optional[str] = None) -> ProcessHandlingModel:
         """Create a new process handling entry"""
@@ -65,7 +65,7 @@ class ProcessHandlingService:
             self.logger.error(f"Create process handling entry failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, process_id: str) -> ProcessHandlingModel:
+    async def get_process_handling_by_id(self, process_id: str) -> ProcessHandlingModel:
         """Get process handling entry by ID"""
         try:
             if not process_id or not process_id.strip():
@@ -83,7 +83,7 @@ class ProcessHandlingService:
             self.logger.error(f"Get process handling entry by ID failed: {str(e)}")
             raise
     
-    async def get_projects_by_query(self, request_id: Optional[str] = None,
+    async def get_process_handling_by_query(self, request_id: Optional[str] = None,
                                    project_id: Optional[str] = None,
                                    status: Optional[str] = None,
                                    assigned_worker: Optional[str] = None,
@@ -95,7 +95,7 @@ class ProcessHandlingService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            processes = await self.process_repository.get_all_projects(
+            processes = await self.process_repository.get_all_process_handling(
                 request_id=request_id.strip() if request_id else None,
                 project_id=project_id.strip() if project_id else None,
                 status=status.strip() if status else None,
@@ -113,14 +113,14 @@ class ProcessHandlingService:
             self.logger.error(f"Get process handling entries by query failed: {str(e)}")
             raise
     
-    async def update_project(self, process_id: str, update_data: Dict[str, Any]) -> ProcessHandlingModel:
+    async def update_process_handling(self, process_id: str, update_data: Dict[str, Any]) -> ProcessHandlingModel:
         """Update process handling entry by ID"""
         try:
             if not process_id or not process_id.strip():
                 raise ValidationException("Process ID is required")
             
             # Check if process exists
-            existing_process = await self.get_project_by_id(process_id)
+            existing_process = await self.get_process_handling_by_id(process_id)
             
             # Prepare update data (remove None values and add updated_at)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
@@ -128,7 +128,7 @@ class ProcessHandlingService:
                 from datetime import datetime
                 clean_update_data["updated_at"] = datetime.utcnow().isoformat()
             
-            updated_process = await self.process_repository.update_project(
+            updated_process = await self.process_repository.update_process_handling(
                 process_id.strip(), clean_update_data
             )
             
@@ -144,68 +144,3 @@ class ProcessHandlingService:
             self.logger.error(f"Update process handling entry failed: {str(e)}")
             raise
     
-    async def start_process(self, process_id: str) -> ProcessHandlingModel:
-        """Start a process"""
-        try:
-            process = await self.get_project_by_id(process_id)
-            process.start_processing()
-            
-            updated_process = await self.process_repository.update_project(
-                process_id, process.to_dict()
-            )
-            
-            if not updated_process:
-                raise ProcessHandlingNotFoundException(f"Failed to start process with ID {process_id}")
-            
-            self.logger.info(f"Process started: {process_id}")
-            return updated_process
-            
-        except (ProcessHandlingNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Start process failed: {str(e)}")
-            raise
-    
-    async def complete_process(self, process_id: str) -> ProcessHandlingModel:
-        """Complete a process"""
-        try:
-            process = await self.get_project_by_id(process_id)
-            process.complete_processing()
-            
-            updated_process = await self.process_repository.update_project(
-                process_id, process.to_dict()
-            )
-            
-            if not updated_process:
-                raise ProcessHandlingNotFoundException(f"Failed to complete process with ID {process_id}")
-            
-            self.logger.info(f"Process completed: {process_id}")
-            return updated_process
-            
-        except (ProcessHandlingNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Complete process failed: {str(e)}")
-            raise
-    
-    async def fail_process(self, process_id: str, notes: Optional[str] = None) -> ProcessHandlingModel:
-        """Fail a process"""
-        try:
-            process = await self.get_project_by_id(process_id)
-            process.fail_processing(notes)
-            
-            updated_process = await self.process_repository.update_project(
-                process_id, process.to_dict()
-            )
-            
-            if not updated_process:
-                raise ProcessHandlingNotFoundException(f"Failed to fail process with ID {process_id}")
-            
-            self.logger.info(f"Process failed: {process_id}")
-            return updated_process
-            
-        except (ProcessHandlingNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Fail process failed: {str(e)}")
-            raise 

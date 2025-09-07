@@ -29,7 +29,7 @@ class KeywordsRepository(BaseRepository):
         keywords_data = await super().find_all_by_query(query, limit)
         return [KeywordsModel.from_dict(data) for data in keywords_data]
     
-    async def get_all_projects(self, request_id: Optional[str] = None, 
+    async def get_all_keyword(self, request_id: Optional[str] = None,
                               keyword_type: Optional[str] = None,
                               limit: Optional[int] = None) -> List[KeywordsModel]:
         """Get all keywords with optional filters"""
@@ -42,7 +42,7 @@ class KeywordsRepository(BaseRepository):
             
         return await self.find_all_by_query(query if query else None, limit)
     
-    async def update_project(self, keyword_id: str, update_data: Dict[str, Any]) -> Optional[KeywordsModel]:
+    async def update_keyword(self, keyword_id: str, update_data: Dict[str, Any]) -> Optional[KeywordsModel]:
         """Update keyword by ID"""
         updated_data = await super().update_by_query({"pk": keyword_id}, update_data)
         return KeywordsModel.from_dict(updated_data) if updated_data else None 

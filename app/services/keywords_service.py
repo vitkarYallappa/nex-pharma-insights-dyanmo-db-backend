@@ -28,7 +28,7 @@ class KeywordsService:
         self.keywords_repository = KeywordsRepository()
         self.logger = logger
     
-    async def create_project(self, keyword: str, request_id: str, keyword_type: Optional[str] = None) -> KeywordsModel:
+    async def create_keyword(self, keyword: str, request_id: str, keyword_type: Optional[str] = None) -> KeywordsModel:
         """Create a new keyword"""
         try:
             # Validate required fields
@@ -56,7 +56,7 @@ class KeywordsService:
             self.logger.error(f"Create keyword failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, keyword_id: str) -> KeywordsModel:
+    async def get_keyword_by_id(self, keyword_id: str) -> KeywordsModel:
         """Get keyword by ID"""
         try:
             if not keyword_id or not keyword_id.strip():
@@ -74,7 +74,7 @@ class KeywordsService:
             self.logger.error(f"Get keyword by ID failed: {str(e)}")
             raise
     
-    async def get_projects_by_query(self, request_id: Optional[str] = None,
+    async def get_keyword_by_query(self, request_id: Optional[str] = None,
                                    keyword_type: Optional[str] = None,
                                    limit: Optional[int] = None) -> List[KeywordsModel]:
         """Get keywords with optional filters"""
@@ -83,7 +83,7 @@ class KeywordsService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            keywords = await self.keywords_repository.get_all_projects(
+            keywords = await self.keywords_repository.get_all_keyword(
                 request_id=request_id.strip() if request_id else None,
                 keyword_type=keyword_type.strip() if keyword_type else None,
                 limit=limit
@@ -98,14 +98,14 @@ class KeywordsService:
             self.logger.error(f"Get keywords by query failed: {str(e)}")
             raise
     
-    async def update_project(self, keyword_id: str, update_data: Dict[str, Any]) -> KeywordsModel:
+    async def update_keyword(self, keyword_id: str, update_data: Dict[str, Any]) -> KeywordsModel:
         """Update keyword by ID"""
         try:
             if not keyword_id or not keyword_id.strip():
                 raise ValidationException("Keyword ID is required")
             
             # Check if keyword exists
-            existing_keyword = await self.get_project_by_id(keyword_id)
+            existing_keyword = await self.get_keyword_by_id(keyword_id)
             
             # Prepare update data (remove None values and add updated_at)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
@@ -113,7 +113,7 @@ class KeywordsService:
                 from datetime import datetime
                 clean_update_data["updated_at"] = datetime.utcnow().isoformat()
             
-            updated_keyword = await self.keywords_repository.update_project(
+            updated_keyword = await self.keywords_repository.update_keyword(
                 keyword_id.strip(), clean_update_data
             )
             

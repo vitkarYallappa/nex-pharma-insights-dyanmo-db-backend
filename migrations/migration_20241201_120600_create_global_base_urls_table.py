@@ -49,6 +49,9 @@ class CreateGlobalBaseUrlsTableMigration(BaseMigration):
             else:
                 logger.info(f"Global_base_urls table {table_name} already exists")
                 
+            # Add some initial data if needed
+            await self._create_initial_data()
+                
         except Exception as e:
             logger.error(f"Error creating global_base_urls table: {str(e)}")
             raise
@@ -69,4 +72,96 @@ class CreateGlobalBaseUrlsTableMigration(BaseMigration):
                 
         except Exception as e:
             logger.error(f"Error deleting global_base_urls table: {str(e)}")
-            raise 
+            raise
+    
+    async def _create_initial_data(self):
+        """Create initial test data for development"""
+        if not settings.is_development:
+            return
+            
+        logger.info("Creating initial test data for global base URLs")
+        
+        try:
+            from app.repositories.global_base_urls_repository import GlobalBaseUrlsRepository
+            from app.models.global_base_urls_model import GlobalBaseUrlsModel
+            
+            base_urls_repo = GlobalBaseUrlsRepository()
+            
+            # Sample pharmaceutical and medical data sources
+            sample_base_urls = [
+                {
+                    "url": "https://pubmed.ncbi.nlm.nih.gov",
+                    "source_name": "PubMed",
+                    "source_type": "medical_literature",
+                    "country_region": "US",
+                    "url_metadata": {
+                        "description": "Biomedical literature database",
+                        "access_type": "public",
+                        "data_format": "xml"
+                    }
+                },
+                {
+                    "url": "https://clinicaltrials.gov",
+                    "source_name": "ClinicalTrials.gov",
+                    "source_type": "clinical_trials",
+                    "country_region": "US",
+                    "url_metadata": {
+                        "description": "Clinical trials registry",
+                        "access_type": "public",
+                        "data_format": "json"
+                    }
+                },
+                {
+                    "url": "https://www.fda.gov",
+                    "source_name": "FDA",
+                    "source_type": "regulatory",
+                    "country_region": "US",
+                    "url_metadata": {
+                        "description": "Food and Drug Administration",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.ema.europa.eu",
+                    "source_name": "EMA",
+                    "source_type": "regulatory",
+                    "country_region": "EU",
+                    "url_metadata": {
+                        "description": "European Medicines Agency",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.who.int",
+                    "source_name": "WHO",
+                    "source_type": "health_organization",
+                    "country_region": "Global",
+                    "url_metadata": {
+                        "description": "World Health Organization",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                }
+            ]
+            
+            for url_data in sample_base_urls:
+                # Check if URL already exists
+                existing_urls = await base_urls_repo.scan({"url": url_data["url"]})
+                
+                if not existing_urls:
+                    base_url = GlobalBaseUrlsModel.create_new(
+                        url=url_data["url"],
+                        source_name=url_data["source_name"],
+                        source_type=url_data["source_type"],
+                        country_region=url_data["country_region"],
+                        is_active=True,
+                        url_metadata=url_data["url_metadata"]
+                    )
+                    
+                    await base_urls_repo.create(base_url)
+                    logger.info(f"Created global base URL: {url_data['source_name']} - {url_data['url']}")
+                
+        except Exception as e:
+            logger.warning(f"Could not create initial global base URLs data: {str(e)}") 

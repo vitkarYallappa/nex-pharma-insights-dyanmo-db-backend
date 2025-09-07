@@ -28,7 +28,7 @@ class ContentUrlMappingService:
         self.mapping_repository = ContentUrlMappingRepository()
         self.logger = logger
     
-    async def create_project(self, discovered_url: str, title: str, content_id: str,
+    async def create_content_url_mapping(self, discovered_url: str, title: str, content_id: str,
                             source_domain: Optional[str] = None, is_canonical: Optional[bool] = None,
                             dedup_confidence: Optional[float] = None, dedup_method: Optional[str] = None) -> ContentUrlMappingModel:
         """Create a new content URL mapping entry"""
@@ -69,7 +69,7 @@ class ContentUrlMappingService:
             self.logger.error(f"Create content URL mapping entry failed: {str(e)}")
             raise
     
-    async def get_project_by_id(self, url_id: str) -> ContentUrlMappingModel:
+    async def get_content_url_mapping_by_id(self, url_id: str) -> ContentUrlMappingModel:
         """Get content URL mapping entry by ID"""
         try:
             if not url_id or not url_id.strip():
@@ -87,7 +87,7 @@ class ContentUrlMappingService:
             self.logger.error(f"Get content URL mapping entry by ID failed: {str(e)}")
             raise
     
-    async def get_projects_by_query(self, content_id: Optional[str] = None,
+    async def get_content_url_mapping_by_query(self, content_id: Optional[str] = None,
                                    source_domain: Optional[str] = None,
                                    is_canonical: Optional[bool] = None,
                                    dedup_method: Optional[str] = None,
@@ -98,7 +98,7 @@ class ContentUrlMappingService:
             if limit is not None and limit <= 0:
                 raise ValidationException("Limit must be a positive number")
             
-            mappings = await self.mapping_repository.get_all_projects(
+            mappings = await self.mapping_repository.get_all_content_url_mapping(
                 content_id=content_id.strip() if content_id else None,
                 source_domain=source_domain.strip() if source_domain else None,
                 is_canonical=is_canonical,
@@ -115,14 +115,14 @@ class ContentUrlMappingService:
             self.logger.error(f"Get content URL mapping entries by query failed: {str(e)}")
             raise
     
-    async def update_project(self, url_id: str, update_data: Dict[str, Any]) -> ContentUrlMappingModel:
+    async def update_content_url_mapping(self, url_id: str, update_data: Dict[str, Any]) -> ContentUrlMappingModel:
         """Update content URL mapping entry by ID"""
         try:
             if not url_id or not url_id.strip():
                 raise ValidationException("URL ID is required")
             
             # Check if mapping exists
-            existing_mapping = await self.get_project_by_id(url_id)
+            existing_mapping = await self.get_content_url_mapping_by_id(url_id)
             
             # Validate dedup_confidence if being updated
             if "dedup_confidence" in update_data and update_data["dedup_confidence"] is not None:
@@ -133,7 +133,7 @@ class ContentUrlMappingService:
             # Prepare update data (remove None values)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}
             
-            updated_mapping = await self.mapping_repository.update_project(
+            updated_mapping = await self.mapping_repository.update_content_url_mapping(
                 url_id.strip(), clean_update_data
             )
             
@@ -148,93 +148,3 @@ class ContentUrlMappingService:
         except Exception as e:
             self.logger.error(f"Update content URL mapping entry failed: {str(e)}")
             raise
-    
-    async def mark_as_canonical(self, url_id: str) -> ContentUrlMappingModel:
-        """Mark URL mapping as canonical"""
-        try:
-            mapping = await self.get_project_by_id(url_id)
-            mapping.mark_as_canonical()
-            
-            updated_mapping = await self.mapping_repository.update_project(
-                url_id, mapping.to_dict()
-            )
-            
-            if not updated_mapping:
-                raise ContentUrlMappingNotFoundException(f"Failed to mark URL mapping as canonical with ID {url_id}")
-            
-            self.logger.info(f"URL mapping marked as canonical: {url_id}")
-            return updated_mapping
-            
-        except (ContentUrlMappingNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Mark URL mapping as canonical failed: {str(e)}")
-            raise
-    
-    async def mark_as_duplicate(self, url_id: str, confidence: float, method: str) -> ContentUrlMappingModel:
-        """Mark URL mapping as duplicate with confidence score"""
-        try:
-            if confidence < 0.0 or confidence > 1.0:
-                raise ValidationException("Deduplication confidence must be between 0.0 and 1.0")
-            
-            if not method or not method.strip():
-                raise ValidationException("Deduplication method is required")
-            
-            mapping = await self.get_project_by_id(url_id)
-            mapping.mark_as_duplicate(confidence, method.strip())
-            
-            updated_mapping = await self.mapping_repository.update_project(
-                url_id, mapping.to_dict()
-            )
-            
-            if not updated_mapping:
-                raise ContentUrlMappingNotFoundException(f"Failed to mark URL mapping as duplicate with ID {url_id}")
-            
-            self.logger.info(f"URL mapping marked as duplicate: {url_id} with confidence {confidence}")
-            return updated_mapping
-            
-        except (ContentUrlMappingNotFoundException, ValidationException):
-            raise
-        except Exception as e:
-            self.logger.error(f"Mark URL mapping as duplicate failed: {str(e)}")
-            raise
-    
-    async def get_canonical_urls_by_content(self, content_id: str) -> List[ContentUrlMappingModel]:
-        """Get all canonical URLs for a specific content ID"""
-        try:
-            if not content_id or not content_id.strip():
-                raise ValidationException("Content ID is required")
-            
-            mappings = await self.mapping_repository.get_all_projects(
-                content_id=content_id.strip(),
-                is_canonical=True
-            )
-            
-            self.logger.info(f"Retrieved {len(mappings)} canonical URLs for content {content_id}")
-            return mappings
-            
-        except ValidationException:
-            raise
-        except Exception as e:
-            self.logger.error(f"Get canonical URLs by content failed: {str(e)}")
-            raise
-    
-    async def get_duplicates_by_content(self, content_id: str) -> List[ContentUrlMappingModel]:
-        """Get all duplicate URLs for a specific content ID"""
-        try:
-            if not content_id or not content_id.strip():
-                raise ValidationException("Content ID is required")
-            
-            mappings = await self.mapping_repository.get_all_projects(
-                content_id=content_id.strip(),
-                is_canonical=False
-            )
-            
-            self.logger.info(f"Retrieved {len(mappings)} duplicate URLs for content {content_id}")
-            return mappings
-            
-        except ValidationException:
-            raise
-        except Exception as e:
-            self.logger.error(f"Get duplicate URLs by content failed: {str(e)}")
-            raise 

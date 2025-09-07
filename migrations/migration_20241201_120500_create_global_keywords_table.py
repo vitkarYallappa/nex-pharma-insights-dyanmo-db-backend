@@ -49,6 +49,9 @@ class CreateGlobalKeywordsTableMigration(BaseMigration):
             else:
                 logger.info(f"Global_keywords table {table_name} already exists")
                 
+            # Add some initial data if needed
+            await self._create_initial_data()
+                
         except Exception as e:
             logger.error(f"Error creating global_keywords table: {str(e)}")
             raise
@@ -69,4 +72,57 @@ class CreateGlobalKeywordsTableMigration(BaseMigration):
                 
         except Exception as e:
             logger.error(f"Error deleting global_keywords table: {str(e)}")
-            raise 
+            raise
+    
+    async def _create_initial_data(self):
+        """Create initial test data for development"""
+        if not settings.is_development:
+            return
+            
+        logger.info("Creating initial test data for global keywords")
+        
+        try:
+            from app.repositories.global_keywords_repository import GlobalKeywordsRepository
+            from app.models.global_keywords_model import GlobalKeywordsModel
+            
+            keywords_repo = GlobalKeywordsRepository()
+            
+            # Sample pharmaceutical keywords
+            sample_keywords = [
+                {"keyword": "oncology", "keyword_type": "therapeutic_area"},
+                {"keyword": "cardiology", "keyword_type": "therapeutic_area"},
+                {"keyword": "neurology", "keyword_type": "therapeutic_area"},
+                {"keyword": "immunology", "keyword_type": "therapeutic_area"},
+                {"keyword": "pharmacovigilance", "keyword_type": "safety"},
+                {"keyword": "adverse_event", "keyword_type": "safety"},
+                {"keyword": "drug_interaction", "keyword_type": "safety"},
+                {"keyword": "clinical_trial", "keyword_type": "research"},
+                {"keyword": "biomarker", "keyword_type": "research"},
+                {"keyword": "efficacy", "keyword_type": "research"},
+                {"keyword": "FDA_approval", "keyword_type": "regulatory"},
+                {"keyword": "EMA_approval", "keyword_type": "regulatory"},
+                {"keyword": "phase_I", "keyword_type": "clinical_phase"},
+                {"keyword": "phase_II", "keyword_type": "clinical_phase"},
+                {"keyword": "phase_III", "keyword_type": "clinical_phase"},
+                {"keyword": "molecular_target", "keyword_type": "mechanism"},
+                {"keyword": "protein_kinase", "keyword_type": "mechanism"},
+                {"keyword": "receptor_antagonist", "keyword_type": "mechanism"},
+                {"keyword": "market_analysis", "keyword_type": "commercial"},
+                {"keyword": "competitive_landscape", "keyword_type": "commercial"}
+            ]
+            
+            for keyword_data in sample_keywords:
+                # Check if keyword already exists
+                existing_keywords = await keywords_repo.scan({"keyword": keyword_data["keyword"]})
+                
+                if not existing_keywords:
+                    keyword = GlobalKeywordsModel.create_new(
+                        keyword=keyword_data["keyword"],
+                        keyword_type=keyword_data["keyword_type"]
+                    )
+                    
+                    await keywords_repo.create(keyword)
+                    logger.info(f"Created global keyword: {keyword_data['keyword']} ({keyword_data['keyword_type']})")
+                
+        except Exception as e:
+            logger.warning(f"Could not create initial global keywords data: {str(e)}") 
