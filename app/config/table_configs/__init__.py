@@ -13,5 +13,6 @@ from .global_base_urls_table import GlobalBaseUrlsTableConfig
 from .keywords_table import KeywordsTableConfig
 from .source_urls_table import SourceUrlsTableConfig
 from .content_repository_table import ContentRepositoryTableConfig
+from .process_handling_table import ProcessHandlingTableConfig
 
-__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig"] 
+__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig"] 
