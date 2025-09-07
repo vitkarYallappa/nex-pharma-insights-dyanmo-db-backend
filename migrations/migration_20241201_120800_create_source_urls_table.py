@@ -90,7 +90,7 @@ class CreateSourceUrlsTableMigration(BaseMigration):
             requests_repo = RequestsRepository()
             
             # Get existing requests to create source URLs for
-            requests = await requests_repo.scan({})
+            requests = await requests_repo.find_all_by_query()
             
             if requests:
                 # Sample source URLs for different types of research
@@ -147,12 +147,12 @@ class CreateSourceUrlsTableMigration(BaseMigration):
                     
                     for url_data in urls_for_request:
                         # Check if source URL already exists for this request
-                        existing_urls = await source_urls_repo.scan({
+                        url_exists = await source_urls_repo.exists({
                             "url": url_data["url"],
                             "request_id": request.pk
                         })
                         
-                        if not existing_urls:
+                        if not url_exists:
                             source_url = SourceUrlsModel.create_new(
                                 request_id=request.pk,
                                 url=url_data["url"],

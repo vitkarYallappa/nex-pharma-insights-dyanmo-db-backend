@@ -91,7 +91,7 @@ class CreateRequestsTableMigration(BaseMigration):
             project_repo = ProjectRepository()
             
             # Get existing projects to create requests for
-            projects = await project_repo.scan({})
+            projects = await project_repo.find_all_by_query()
             
             if projects:
                 sample_requests = [
@@ -135,9 +135,9 @@ class CreateRequestsTableMigration(BaseMigration):
                     project = projects[i % len(projects)]
                     
                     # Check if request already exists
-                    existing_requests = await requests_repo.scan({"title": request_data["title"]})
+                    request_exists = await requests_repo.exists({"title": request_data["title"]})
                     
-                    if not existing_requests:
+                    if not request_exists:
                         request = RequestsModel.create_new(
                             project_id=project.pk,
                             title=request_data["title"],

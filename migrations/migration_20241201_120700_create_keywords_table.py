@@ -90,7 +90,7 @@ class CreateKeywordsTableMigration(BaseMigration):
             requests_repo = RequestsRepository()
             
             # Get existing requests to create keywords for
-            requests = await requests_repo.scan({})
+            requests = await requests_repo.find_all_by_query()
             
             if requests:
                 # Sample keywords for different request types
@@ -116,12 +116,12 @@ class CreateKeywordsTableMigration(BaseMigration):
                     
                     for keyword_text in keywords_list:
                         # Check if keyword already exists for this request
-                        existing_keywords = await keywords_repo.scan({
+                        keyword_exists = await keywords_repo.exists({
                             "keyword": keyword_text,
                             "request_id": request.pk
                         })
                         
-                        if not existing_keywords:
+                        if not keyword_exists:
                             keyword = KeywordsModel.create_new(
                                 keyword=keyword_text,
                                 request_id=request.pk,

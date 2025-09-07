@@ -92,7 +92,7 @@ class CreateContentRepositoryTableMigration(BaseMigration):
             requests_repo = RequestsRepository()
             
             # Get existing requests to create content for
-            requests = await requests_repo.scan({})
+            requests = await requests_repo.find_all_by_query()
             
             if requests:
                 # Sample content data
@@ -134,12 +134,12 @@ class CreateContentRepositoryTableMigration(BaseMigration):
                         ).hexdigest()
                         
                         # Check if content already exists
-                        existing_content = await content_repo.scan({
+                        content_exists = await content_repo.exists({
                             "canonical_url": content_data["canonical_url"],
                             "request_id": request.pk
                         })
                         
-                        if not existing_content:
+                        if not content_exists:
                             content = ContentRepositoryModel.create_new(
                                 request_id=request.pk,
                                 project_id=request.project_id,

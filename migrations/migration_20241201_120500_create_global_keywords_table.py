@@ -113,9 +113,9 @@ class CreateGlobalKeywordsTableMigration(BaseMigration):
             
             for keyword_data in sample_keywords:
                 # Check if keyword already exists
-                existing_keywords = await keywords_repo.scan({"keyword": keyword_data["keyword"]})
+                keyword_exists = await keywords_repo.exists({"keyword": keyword_data["keyword"]})
                 
-                if not existing_keywords:
+                if not keyword_exists:
                     keyword = GlobalKeywordsModel.create_new(
                         keyword=keyword_data["keyword"],
                         keyword_type=keyword_data["keyword_type"]

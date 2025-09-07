@@ -92,14 +92,14 @@ class CreateProcessHandlingTableMigration(BaseMigration):
             requests_repo = RequestsRepository()
             
             # Get existing requests to create process handling records for
-            requests = await requests_repo.scan({})
+            requests = await requests_repo.find_all_by_query()
             
             if requests:
                 for request in requests[:3]:  # Limit to first 3 requests
                     # Check if process handling already exists for this request
-                    existing_processes = await process_repo.scan({"request_id": request.pk})
+                    process_exists = await process_repo.exists({"request_id": request.pk})
                     
-                    if not existing_processes:
+                    if not process_exists:
                         process = ProcessHandlingModel.create_new(
                             request_id=request.pk,
                             project_id=request.project_id,

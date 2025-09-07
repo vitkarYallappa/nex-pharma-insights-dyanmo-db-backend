@@ -141,9 +141,9 @@ class CreateProjectsTableMigration(BaseMigration):
             
             for project_data in sample_projects:
                 # Check if project already exists (by name)
-                existing_projects = await project_repo.scan({"name": project_data["name"]})
+                project_exists = await project_repo.exists({"name": project_data["name"]})
                 
-                if not existing_projects:
+                if not project_exists:
                     project = ProjectModel.create_new(
                         name=project_data["name"],
                         description=project_data["description"],

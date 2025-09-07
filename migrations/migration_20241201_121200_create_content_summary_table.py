@@ -91,7 +91,7 @@ class CreateContentSummaryTableMigration(BaseMigration):
             content_repo = ContentRepositoryRepository()
             
             # Get existing content to create summaries for
-            contents = await content_repo.scan({})
+            contents = await content_repo.find_all_by_query()
             
             if contents:
                 sample_summaries = [
@@ -103,9 +103,9 @@ class CreateContentSummaryTableMigration(BaseMigration):
                 
                 for i, content in enumerate(contents[:4]):  # Limit to first 4 content items
                     # Check if summary already exists for this content
-                    existing_summaries = await summary_repo.scan({"content_id": content.pk})
+                    summary_exists = await summary_repo.exists({"content_id": content.pk})
                     
-                    if not existing_summaries:
+                    if not summary_exists:
                         summary = ContentSummaryModel.create_new(
                             content_id=content.pk,
                             request_id=content.request_id,

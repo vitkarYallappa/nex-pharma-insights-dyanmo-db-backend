@@ -91,14 +91,14 @@ class CreateProjectModulesStatisticsTableMigration(BaseMigration):
             project_repo = ProjectRepository()
             
             # Get existing projects to create statistics for
-            projects = await project_repo.scan({})
+            projects = await project_repo.find_all_by_query()
             
             if projects:
                 for project in projects:
                     # Check if statistics already exist for this project
-                    existing_stats = await stats_repo.scan({"project_id": project.pk})
+                    stats_exist = await stats_repo.exists({"project_id": project.pk})
                     
-                    if not existing_stats:
+                    if not stats_exist:
                         statistics = ProjectModulesStatisticsModel.create_new(
                             project_id=project.pk,
                             content_analysis_count=random.randint(10, 100),

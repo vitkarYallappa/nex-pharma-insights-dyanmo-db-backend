@@ -148,9 +148,9 @@ class CreateGlobalBaseUrlsTableMigration(BaseMigration):
             
             for url_data in sample_base_urls:
                 # Check if URL already exists
-                existing_urls = await base_urls_repo.scan({"url": url_data["url"]})
+                url_exists = await base_urls_repo.exists({"url": url_data["url"]})
                 
-                if not existing_urls:
+                if not url_exists:
                     base_url = GlobalBaseUrlsModel.create_new(
                         url=url_data["url"],
                         source_name=url_data["source_name"],
