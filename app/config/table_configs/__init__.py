@@ -17,5 +17,6 @@ from .process_handling_table import ProcessHandlingTableConfig
 from .content_url_mapping_table import ContentUrlMappingTableConfig
 from .content_summary_table import ContentSummaryTableConfig
 from .content_insight_table import ContentInsightTableConfig
+from .content_implication_table import ContentImplicationTableConfig
 
-__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig", "ContentUrlMappingTableConfig", "ContentSummaryTableConfig", "ContentInsightTableConfig"] 
+__all__ = ["UsersTableConfig", "ProjectsTableConfig", "ProjectRequestStatisticsTableConfig", "ProjectModulesStatisticsTableConfig", "RequestsTableConfig", "GlobalKeywordsTableConfig", "GlobalBaseUrlsTableConfig", "KeywordsTableConfig", "SourceUrlsTableConfig", "ContentRepositoryTableConfig", "ProcessHandlingTableConfig", "ContentUrlMappingTableConfig", "ContentSummaryTableConfig", "ContentInsightTableConfig", "ContentImplicationTableConfig"] 
