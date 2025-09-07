@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any
 import uuid
 
 from app.controllers.global_base_url_controller import GlobalBaseUrlController
-from app.core.response import APIResponse
+from app.core.response import APIResponse, safe_response_detail
 from app.core.logging import get_logger
 from app.config.settings import settings
 
@@ -62,7 +62,7 @@ async def create_global_base_url(url_data: CreateGlobalBaseUrlRequest, request: 
     if response.status == "error":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=response.model_dump() if hasattr(response, 'model_dump') else response.dict()
+            detail=safe_response_detail(response)
         )
 
     return response
@@ -82,7 +82,7 @@ async def get_global_base_url(url_id: str, request: Request) -> APIResponse:
     if response.status == "error":
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=response.model_dump() if hasattr(response, 'model_dump') else response.dict()
+            detail=safe_response_detail(response)
         )
 
     return response

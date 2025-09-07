@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any
 import uuid
 
 from app.controllers.global_keywords_controller import GlobalKeywordsController
-from app.core.response import APIResponse
+from app.core.response import APIResponse, safe_response_detail
 from app.core.logging import get_logger
 from app.config.settings import settings
 
@@ -50,7 +50,7 @@ async def create_global_keyword(keyword_data: CreateGlobalKeywordRequest, reques
     if response.status == "error":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=response.model_dump() if hasattr(response, 'model_dump') else response.dict()
+            detail=safe_response_detail(response)
         )
     
     return response

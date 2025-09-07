@@ -4,7 +4,7 @@ Provides consistent response structure across the application
 """
 
 from typing import Any, Optional, Dict, List, Union
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from enum import Enum
 
@@ -24,6 +24,12 @@ class ResponseMeta(BaseModel):
 
 class APIResponse(BaseModel):
     """Standard API response structure"""
+    model_config = ConfigDict(
+        json_encoders={
+            datetime: lambda v: v.isoformat()
+        }
+    )
+    
     status: ResponseStatus
     message: str
     data: Optional[Any] = None
@@ -215,3 +221,35 @@ def paginated_response(
 ) -> Dict[str, Any]:
     """Quick paginated response as dict"""
     return ResponseFormatter.paginated(data, total, page, page_size, message, request_id).dict()
+
+def safe_response_detail(response: APIResponse) -> Dict[str, Any]:
+    """
+    Safely serialize APIResponse for HTTPException detail
+    Handles datetime serialization issues
+    """
+    try:
+        return response.model_dump(mode='json') if hasattr(response, 'model_dump') else response.dict()
+    except Exception:
+        # Fallback to basic error info if serialization fails
+        return {
+            "status": response.status,
+            "message": response.message,
+            "errors": response.errors if hasattr(response, 'errors') else None,
+            "timestamp": response.timestamp.isoformat() if hasattr(response, 'timestamp') else None,
+            "request_id": response.request_id if hasattr(response, 'request_id') else None
+        }
+
+def to_response_format(item: Union[Any, Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Generic function to convert model objects or dictionaries to response format
+    Handles both model objects with to_response() method and plain dictionaries
+    """
+    if hasattr(item, 'to_response') and callable(getattr(item, 'to_response')):
+        return item.to_response()
+    elif isinstance(item, dict):
+        return item
+    elif hasattr(item, 'to_dict') and callable(getattr(item, 'to_dict')):
+        return item.to_dict()
+    else:
+        # Fallback: try to convert to dict if possible
+        return item if isinstance(item, dict) else dict(item) if hasattr(item, '__dict__') else item

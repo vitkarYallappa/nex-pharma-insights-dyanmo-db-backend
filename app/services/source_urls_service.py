@@ -28,7 +28,7 @@ class SourceUrlsService:
         self.urls_repository = SourceUrlsRepository()
         self.logger = logger
     
-    async def create_project(self, request_id: str, url: str, source_name: Optional[str] = None,
+    async def create_source_url(self, request_id: str, url: str, source_name: Optional[str] = None,
                             source_type: Optional[str] = None, country_region: Optional[str] = None,
                             is_active: bool = True, url_metadata: Optional[Dict[str, Any]] = None) -> SourceUrlsModel:
         """Create a new source URL"""

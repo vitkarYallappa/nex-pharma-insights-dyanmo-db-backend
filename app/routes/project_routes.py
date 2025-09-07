@@ -6,11 +6,11 @@ Follows the same pattern as UserRoutes for consistency
 
 from fastapi import APIRouter, Query, HTTPException, status, Request
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import uuid
 
 from app.controllers.project_controller import ProjectController
-from app.core.response import APIResponse
+from app.core.response import APIResponse, safe_response_detail
 from app.core.logging import get_logger
 from app.config.settings import settings
 
@@ -33,6 +33,32 @@ class CreateProjectRequest(BaseModel):
     status: Optional[str] = Field("active", description="Project status")
     project_metadata: Optional[Dict[str, Any]] = Field(None, description="Project metadata JSON")
     module_config: Optional[Dict[str, Any]] = Field(None, description="Module configuration JSON")
+
+class BaseUrlRequest(BaseModel):
+    """Request model for base URL"""
+    source_type: str = Field(..., description="Source type (e.g., government, academic, clinical)")
+    source_name: str = Field(..., description="Source name (e.g., FDA, NIH)")
+    url: str = Field(..., description="Base URL")
+    country_region: Optional[str] = Field(None, description="Country or region")
+    is_active: Optional[bool] = Field(True, description="Active status")
+    url_metadata: Optional[Dict[str, Any]] = Field(None, description="Additional URL metadata")
+
+class TimeRangeRequest(BaseModel):
+    """Request model for time range"""
+    start: str = Field(..., description="Start date (YYYY-MM-DD)")
+    end: str = Field(..., description="End date (YYYY-MM-DD)")
+    date_range: Optional[str] = Field(None, description="Human readable date range")
+
+class CreateProjectRequestWithDetails(BaseModel):
+    """Request model for creating a complete project request with all related entities"""
+    project_id: Optional[str] = Field(None, description="Optional existing project ID")
+    title: str = Field(..., description="Project request title", min_length=1, max_length=255)
+    description: Optional[str] = Field(None, description="Project request description", max_length=2000)
+    time_range: Optional[TimeRangeRequest] = Field(None, description="Time range for the request")
+    priority: Optional[str] = Field("medium", description="Priority level (low, medium, high)")
+    created_by: str = Field(..., description="Creator user ID (UUID as string)")
+    keywords: List[str] = Field(default=[], description="List of keywords for the request")
+    base_urls: List[BaseUrlRequest] = Field(default=[], description="List of base URLs for monitoring")
 
 # Project CRUD Operations
 @router.post("/",
@@ -58,7 +84,7 @@ async def create_project(project_data: CreateProjectRequest, request: Request) -
     if response.status == "error":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=response.model_dump() if hasattr(response, 'model_dump') else response.dict()
+            detail=safe_response_detail(response)
         )
     
     return response
@@ -77,7 +103,7 @@ async def get_project(project_id: str, request: Request) -> APIResponse:
     if response.status == "error":
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=response.model_dump() if hasattr(response, 'model_dump') else response.dict()
+            detail=safe_response_detail(response)
         )
     
     return response
@@ -103,5 +129,42 @@ async def get_projects_by_query(
         limit=limit,
         request_id=request_id
     )
+    
+    return response
+
+# Project Request Creation Orchestrator
+@router.post("/request",
+            response_model=APIResponse,
+            status_code=status.HTTP_201_CREATED,
+            summary="Create complete project request",
+            description="Create a complete project request with project, request, keywords, and source URLs")
+async def create_project_request_with_details(
+    request_data: CreateProjectRequestWithDetails, 
+    request: Request
+) -> APIResponse:
+    """Create a complete project request with all related entities"""
+    request_id = get_request_id(request)
+    logger.info(f"[{request_id}] Create project request orchestration: {request_data.title}")
+    
+    # Convert Pydantic models to dictionaries
+    payload = {
+        "project_id": request_data.project_id,
+        "title": request_data.title,
+        "description": request_data.description,
+        "time_range": request_data.time_range.model_dump() if request_data.time_range else {},
+        "priority": request_data.priority,
+        "created_by": request_data.created_by,
+        "keywords": request_data.keywords,
+        "base_urls": [url.model_dump() for url in request_data.base_urls]
+    }
+    
+    # Call controller method (proper layered architecture)
+    response = await get_project_controller().create_project_request_with_details(payload, request_id)
+    
+    if response.status == "error":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=safe_response_detail(response)
+        )
     
     return response 

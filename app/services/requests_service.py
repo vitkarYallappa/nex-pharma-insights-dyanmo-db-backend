@@ -66,22 +66,39 @@ class RequestsService:
             self.logger.error(f"Create request failed: {str(e)}")
             raise
     
-    async def get_request_by_id(self, request_id: str) -> RequestsModel:
-        """Get request by ID"""
+    async def find_one_by_query(self, request_id: Optional[str] = None, project_id: Optional[str] = None) -> RequestsModel:
+        """Get request by request_id or project_id"""
         try:
-            if not request_id or not request_id.strip():
-                raise ValidationException("Request ID is required")
+            # Validate that at least one parameter is provided
+            if not request_id and not project_id:
+                raise ValidationException("Either request_id or project_id is required")
             
-            request = await self.requests_repository.find_one_by_query({"pk": request_id.strip()})
+            # Validate that only one parameter is provided
+            if request_id and project_id:
+                raise ValidationException("Provide either request_id or project_id, not both")
+
+            # Build query based on provided parameter
+            if request_id:
+                if not request_id.strip():
+                    raise ValidationException("Request ID cannot be empty")
+                query = {"pk": request_id.strip()}
+            else:  # project_id is provided
+                if not project_id.strip():
+                    raise ValidationException("Project ID cannot be empty")
+                query = {"project_id": project_id.strip()}
+
+            request = await self.requests_repository.find_one_by_query(query)
             if not request:
-                raise RequestsNotFoundException(f"Request with ID {request_id} not found")
-            
+                identifier = request_id if request_id else project_id
+                identifier_type = "request_id" if request_id else "project_id"
+                raise RequestsNotFoundException(f"Request with {identifier_type} {identifier} not found")
+
             return request
-            
+
         except (RequestsNotFoundException, ValidationException):
             raise
         except Exception as e:
-            self.logger.error(f"Get request by ID failed: {str(e)}")
+            self.logger.error(f"Get request by query failed: {str(e)}")
             raise
     
     async def get_request_by_query(self, project_id: Optional[str] = None,
@@ -119,7 +136,7 @@ class RequestsService:
                 raise ValidationException("Request ID is required")
             
             # Check if request exists
-            existing_request = await self.get_request_by_id(request_id)
+            existing_request = await self.find_one_by_query(request_id=request_id)
             
             # Prepare update data (remove None values and add updated_at)
             clean_update_data = {k: v for k, v in update_data.items() if v is not None}

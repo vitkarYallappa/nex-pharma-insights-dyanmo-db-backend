@@ -55,17 +55,47 @@ class BaseRepository(ABC):
     async def find_one_by_query(self, query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Find single item by query filters"""
         try:
+            self.logger.debug(f"Find one query in {self.table_name} - Query: {query}")
+            
+            # If querying by primary key 'pk', use get_item for better performance
+            if len(query) == 1 and 'pk' in query:
+                self.logger.debug(f"Using get_item for primary key lookup: {query['pk']}")
+                response = self.table.get_item(Key={'pk': query['pk']})
+                result = response.get('Item')
+                self.logger.info(f"Find one by pk in {self.table_name} - Found: {result is not None}")
+                if result:
+                    self.logger.debug(f"Found item: {result}")
+                return result
+            
+            # For other queries, use scan with filter
             filter_expression = self._build_filter_expression(query)
+            self.logger.debug(f"Filter expression: {filter_expression}")
             
             if filter_expression:
-                response = self.table.scan(FilterExpression=filter_expression, Limit=1)
+                # Don't use Limit=1 with filters as scan might not find the item
+                # Instead, scan all and take first match
+                response = self.table.scan(FilterExpression=filter_expression)
+                items = response.get('Items', [])
+                result = items[0] if items else None
+                
+                # Handle pagination if needed
+                while 'LastEvaluatedKey' in response and not result:
+                    response = self.table.scan(
+                        FilterExpression=filter_expression,
+                        ExclusiveStartKey=response['LastEvaluatedKey']
+                    )
+                    items = response.get('Items', [])
+                    result = items[0] if items else None
             else:
                 response = self.table.scan(Limit=1)
-            
-            items = response.get('Items', [])
-            result = items[0] if items else None
+                items = response.get('Items', [])
+                result = items[0] if items else None
             
             self.logger.info(f"Find one query in {self.table_name} - Found: {result is not None}")
+            if result:
+                self.logger.debug(f"Found item: {result}")
+            else:
+                self.logger.debug(f"No items found. Response: {response}")
             return result
         except Exception as e:
             self.logger.error(f"Find one failed in {self.table_name}: {str(e)}")

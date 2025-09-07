@@ -6,6 +6,9 @@ Follows the same pattern as UserService for consistency
 from typing import List, Optional, Dict, Any
 from app.repositories.project_repository import ProjectRepository
 from app.models.project_model import ProjectModel
+from app.services.requests_service import RequestsService
+from app.services.keywords_service import KeywordsService
+from app.services.source_urls_service import SourceUrlsService
 from app.core.logging import get_logger
 from app.core.exceptions import (
     UserNotFoundException,
@@ -27,6 +30,9 @@ class ProjectService:
     
     def __init__(self):
         self.project_repository = ProjectRepository()
+        self.requests_service = RequestsService()
+        self.keywords_service = KeywordsService()
+        self.source_urls_service = SourceUrlsService()
         self.logger = logger
     
     async def create_project(self, name: str, created_by: str, description: Optional[str] = None,
@@ -94,7 +100,14 @@ class ProjectService:
                 created_by=created_by.strip() if created_by else None,
                 limit=limit
             )
-            
+
+            # Enrich projects with request data
+            for i, project in enumerate(projects):
+                enriched_project = await self._enrich_single_project_with_request_data(project)
+                projects[i] = enriched_project
+
+
+
             self.logger.info(f"Retrieved {len(projects)} projects with filters: status={status}, created_by={created_by}")
             return projects
             
@@ -104,6 +117,82 @@ class ProjectService:
             self.logger.error(f"Get projects by query failed: {str(e)}")
             raise
     
+
+    async def _enrich_single_project_with_request_data(self, project) -> Any:
+        """
+        Enrich a single project with its associated request data
+        
+        Args:
+            project: Single project model or dict to enrich
+            
+        Returns:
+            Enriched project with request data attached
+        """
+        try:
+            project_id = project.get("pk") if hasattr(project, 'get') else project.pk
+            
+            # Get the single request for this project
+            request = await self.requests_service.find_one_by_query(project_id=project_id)
+            
+            if request:
+                request_id = request.get("pk") if hasattr(request, 'get') else request.pk
+                request_dict = request.to_dict() if hasattr(request, 'to_dict') else request
+                
+                # Get keywords count for this request
+                keywords = await self.keywords_service.get_keyword_by_query(request_id=request_id)
+                keywords_count = len(keywords)
+                
+                # Get source URLs count for this request
+                source_urls = await self.source_urls_service.get_source_urls_by_query(request_id=request_id)
+                source_urls_count = len(source_urls)
+                
+                # Create request info
+                request_info = {
+                    "request_id": request_id,
+                    "description": request_dict.get("description"),
+                    "title": request_dict.get("title"),
+                    "status": request_dict.get("status"),
+                    "priority": request_dict.get("priority"),
+                    "keywords_count": keywords_count,
+                    "source_urls_count": source_urls_count
+                }
+                
+                # Update project with request data
+                if hasattr(project, 'update'):
+                    project.update({
+                        "request": request_info,
+                        "has_request": True
+                    })
+                    return project
+                else:
+                    # If project is a model object, convert to dict and update
+                    project_dict = project.to_dict() if hasattr(project, 'to_dict') else project
+                    project_dict.update({
+                        "request": request_info,
+                        "has_request": True
+                    })
+                    return project_dict
+            else:
+                # No request found for this project
+                if hasattr(project, 'update'):
+                    project.update({
+                        "request": None,
+                        "has_request": False
+                    })
+                    return project
+                else:
+                    # If project is a model object, convert to dict and update
+                    project_dict = project.to_dict() if hasattr(project, 'to_dict') else project
+                    project_dict.update({
+                        "request": None,
+                        "has_request": False
+                    })
+                    return project_dict
+                    
+        except Exception as e:
+            self.logger.error(f"Failed to enrich single project with request data: {str(e)}")
+            raise
+
 
     
     async def update_project(self, project_id: str, update_data: Dict[str, Any]) -> ProjectModel:
