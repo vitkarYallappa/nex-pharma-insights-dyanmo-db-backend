@@ -13,6 +13,7 @@ from app.core.response import ResponseFormatter, APIResponse
 from app.core.database import dynamodb_client
 from app.routes.user_routes import router as user_router
 from app.routes.project_routes import router as project_router
+from app.routes.global_keywords_routes import router as global_keywords_router
 from app.routes.migration_routes import router as migration_router
 from app.routes.seeder_routes import router as seeder_router
 
@@ -76,6 +77,12 @@ app.include_router(
     project_router,
     prefix="/api/v1/projects",
     tags=["Projects"]
+)
+
+app.include_router(
+    global_keywords_router,
+    prefix="/api/v1/global-keywords",
+    tags=["Global Keywords"]
 )
 
 # Migration and Seeder Routes
