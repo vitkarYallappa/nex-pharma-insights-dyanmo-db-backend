@@ -33,7 +33,7 @@ class ProjectRequestStatisticsModel(BaseModel):
     failed_requests: Optional[int] = Field(None, description="Failed request count")
     
     # SQLAlchemy: average_processing_time (Float) -> DynamoDB: average_processing_time (Number)
-    average_processing_time: Optional[float] = Field(None, description="Average processing time in seconds")
+    average_processing_time: Optional[int] = Field(None, description="Average processing time in seconds")
     
     # SQLAlchemy: last_activity_at (DateTime) -> DynamoDB: last_activity_at (String)
     last_activity_at: Optional[str] = Field(None, description="Last activity timestamp (ISO string)")
@@ -55,7 +55,7 @@ class ProjectRequestStatisticsModel(BaseModel):
     @classmethod
     def create_new(cls, project_id: str, total_requests: Optional[int] = None,
                    completed_requests: Optional[int] = None, pending_requests: Optional[int] = None,
-                   failed_requests: Optional[int] = None, average_processing_time: Optional[float] = None,
+                   failed_requests: Optional[int] = None, average_processing_time: Optional[int] = None,
                    last_activity_at: Optional[str] = None, statistics_metadata: Optional[Dict[str, Any]] = None) -> 'ProjectRequestStatisticsModel':
         """Create a new project request statistics instance"""
         now = datetime.utcnow().isoformat()

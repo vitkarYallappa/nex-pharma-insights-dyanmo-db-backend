@@ -129,3 +129,30 @@ class InsightCommentService:
             self.logger.error(f"Update insight comment entry failed: {str(e)}")
             raise
     
+    async def get_all_by_query(self, query_filters: Optional[Dict[str, Any]] = None, limit: Optional[int] = None) -> List[InsightCommentModel]:
+        """Get all insight comment entries by query filters"""
+        try:
+            # Validate limit if provided
+            if limit is not None and limit <= 0:
+                raise ValidationException("Limit must be greater than 0")
+            
+            # Get entries from repository
+            entries = await self.comment_repository.find_all_by_query(query=query_filters, limit=limit)
+            
+            # Convert to model objects - check if entries are already model objects or dicts
+            comment_models = []
+            for entry in entries:
+                if isinstance(entry, InsightCommentModel):
+                    comment_models.append(entry)
+                else:
+                    comment_models.append(InsightCommentModel.from_dict(entry))
+            
+            self.logger.info(f"Retrieved {len(comment_models)} insight comment entries with filters: {query_filters}")
+            return comment_models
+            
+        except ValidationException:
+            raise
+        except Exception as e:
+            self.logger.error(f"Get insight comment entries by query failed: {str(e)}")
+            raise
+    

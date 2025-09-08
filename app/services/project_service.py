@@ -77,7 +77,9 @@ class ProjectService:
             project = await self.project_repository.find_one_by_query({"pk": project_id.strip()})
             if not project:
                 raise ProjectNotFoundException(f"Project with ID {project_id} not found")
-            
+
+            project = await self._enrich_single_project_with_request_data(project)
+
             return project
             
         except (ProjectNotFoundException, ValidationException):
@@ -140,6 +142,7 @@ class ProjectService:
                 
                 # Get keywords count for this request
                 keywords = await self.keywords_service.get_keyword_by_query(request_id=request_id)
+                keywords = [item.keyword for item in keywords]
                 keywords_count = len(keywords)
                 
                 # Get source URLs count for this request
@@ -149,11 +152,12 @@ class ProjectService:
                 # Create request info
                 request_info = {
                     "request_id": request_id,
-                    "description": request_dict.get("description"),
-                    "title": request_dict.get("title"),
+                    # "description": request_dict.get("description"),
+                    # "title": request_dict.get("title"),
                     "status": request_dict.get("status"),
-                    "priority": request_dict.get("priority"),
+                    # "priority": request_dict.get("priority"),
                     "keywords_count": keywords_count,
+                    "keywords_list": keywords,
                     "source_urls_count": source_urls_count
                 }
                 

@@ -20,6 +20,7 @@ from app.models.keywords_model import KeywordsModel
 from app.models.source_urls_model import SourceUrlsModel
 from app.models.project_request_statistics_model import ProjectRequestStatisticsModel
 from app.models.project_modules_statistics_model import ProjectModulesStatisticsModel
+from app.use_cases.content_repo_dummy_service import ContentRepoDummyService
 from app.core.logging import get_logger
 from app.core.exceptions import ValidationException
 
@@ -42,6 +43,7 @@ class ProjectRequestCreationOrchestrator:
         self.requests_service = RequestsService()
         self.keywords_service = KeywordsService()
         self.source_urls_service = SourceUrlsService()
+        self.content_dummy_service = ContentRepoDummyService()
         self.logger = logger
     
     async def create_complete_project_request(
@@ -77,6 +79,7 @@ class ProjectRequestCreationOrchestrator:
             "source_urls": [],
             "project_request_statistics": None,
             "project_modules_statistics": None,
+            "dummy_content": None,
             "orchestration_id": orchestration_id,
             "created_at": datetime.utcnow().isoformat()
         }
@@ -117,6 +120,32 @@ class ProjectRequestCreationOrchestrator:
             modules_stats = await self._create_project_modules_statistics(project.pk, orchestration_id)
             created_entities["project_modules_statistics"] = modules_stats.to_response()
             self.logger.info(f"[{orchestration_id}] Project modules statistics created: {modules_stats.pk}")
+            
+            # Step 7: Generate Dummy Content Data
+            self.logger.info(f"[{orchestration_id}] Step 7: Generating dummy content data")
+            try:
+                dummy_content_results = await self.content_dummy_service.generate_dummy_content(
+                    project_id=project.pk,
+                    request_id=request.pk
+                )
+                created_entities["dummy_content"] = dummy_content_results
+                self.logger.info(
+                    f"[{orchestration_id}] Dummy content generated successfully - "
+                    f"Items: {dummy_content_results['items_processed']}, "
+                    f"Insights: {dummy_content_results['total_insights']}, "
+                    f"Implications: {dummy_content_results['total_implications']}, "
+                    f"Summaries: {dummy_content_results['total_summaries']}"
+                )
+            except Exception as content_error:
+                self.logger.warning(f"[{orchestration_id}] Dummy content generation failed: {str(content_error)}")
+                # Don't fail the entire process if dummy content generation fails
+                created_entities["dummy_content"] = {
+                    "error": str(content_error),
+                    "items_processed": 0,
+                    "total_insights": 0,
+                    "total_implications": 0,
+                    "total_summaries": 0
+                }
             
             # Success summary
             self.logger.info(
@@ -434,7 +463,7 @@ class ProjectRequestCreationOrchestrator:
                 completed_requests=0,
                 pending_requests=1,  # The request we just created is pending
                 failed_requests=0,
-                average_processing_time=0.0,
+                average_processing_time=0,
                 last_activity_at=datetime.utcnow().isoformat(),
                 statistics_metadata={
                     "created_by_orchestrator": True,

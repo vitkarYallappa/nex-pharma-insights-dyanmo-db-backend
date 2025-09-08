@@ -158,3 +158,30 @@ class ContentSummaryService:
         except Exception as e:
             self.logger.error(f"Update content summary entry failed: {str(e)}")
             raise
+    
+    async def get_all_by_query(self, query_filters: Optional[Dict[str, Any]] = None, limit: Optional[int] = None) -> List[ContentSummaryModel]:
+        """Get all content summary entries by query filters"""
+        try:
+            # Validate limit if provided
+            if limit is not None and limit <= 0:
+                raise ValidationException("Limit must be greater than 0")
+            
+            # Get entries from repository
+            entries = await self.summary_repository.find_all_by_query(query=query_filters, limit=limit)
+            
+            # Convert to model objects - check if entries are already model objects or dicts
+            summary_models = []
+            for entry in entries:
+                if isinstance(entry, ContentSummaryModel):
+                    summary_models.append(entry)
+                else:
+                    summary_models.append(ContentSummaryModel.from_dict(entry))
+            
+            self.logger.info(f"Retrieved {len(summary_models)} content summary entries with filters: {query_filters}")
+            return summary_models
+            
+        except ValidationException:
+            raise
+        except Exception as e:
+            self.logger.error(f"Get content summary entries by query failed: {str(e)}")
+            raise

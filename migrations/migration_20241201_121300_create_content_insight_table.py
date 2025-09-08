@@ -51,7 +51,7 @@ class CreateContentInsightTableMigration(BaseMigration):
                 
         
             # Add some initial data if needed
-            await self._create_initial_data()
+            # await self._create_initial_data()
                 
         except Exception as e:
             logger.error(f"Error creating content_insight table: {str(e)}")

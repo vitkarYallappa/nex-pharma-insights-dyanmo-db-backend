@@ -74,7 +74,7 @@ class ProjectController:
             
             self.logger.info(f"Project retrieved successfully: {project_id}")
             return ResponseFormatter.success(
-                data=project.to_response(),
+                data=to_response_format(project),
                 message=f"Project retrieved successfully",
                 request_id=request_id
             )

@@ -50,7 +50,7 @@ class CreateProjectRequestStatisticsTableMigration(BaseMigration):
                 logger.info(f"Project_request_statistics table {table_name} already exists")
                 
             # Add some initial data if needed
-            await self._create_initial_data()
+            # await self._create_initial_data()
                 
         except Exception as e:
             logger.error(f"Error creating project_request_statistics table: {str(e)}")

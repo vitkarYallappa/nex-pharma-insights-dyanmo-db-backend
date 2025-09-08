@@ -17,6 +17,12 @@ from app.routes.global_keywords_routes import router as global_keywords_router
 from app.routes.global_base_url_routes import router as global_base_url_router
 from app.routes.migration_routes import router as migration_router
 from app.routes.seeder_routes import router as seeder_router
+from app.routes.content_repository_routes import router as content_repository_router
+from app.routes.content_summary_routes import router as content_summary_router
+from app.routes.content_insight_routes import router as content_insight_router
+from app.routes.content_implication_routes import router as content_implication_router
+from app.routes.insight_comment_routes import router as insight_comment_router
+from app.routes.implication_comment_routes import router as implication_comment_router
 
 # Initialize logging
 setup_logging()
@@ -92,6 +98,43 @@ app.include_router(
     tags=["Global Base URLs"]
 )
 
+# Content Routes
+app.include_router(
+    content_repository_router,
+    prefix="/api/v1/content-repository",
+    tags=["Content Repository"]
+)
+
+app.include_router(
+    content_summary_router,
+    prefix="/api/v1/content-summary",
+    tags=["Content Summary"]
+)
+
+app.include_router(
+    content_insight_router,
+    prefix="/api/v1/content-insight",
+    tags=["Content Insight"]
+)
+
+app.include_router(
+    content_implication_router,
+    prefix="/api/v1/content-implication",
+    tags=["Content Implication"]
+)
+
+app.include_router(
+    insight_comment_router,
+    prefix="/api/v1/insight-comment",
+    tags=["Insight Comment"]
+)
+
+app.include_router(
+    implication_comment_router,
+    prefix="/api/v1/implication-comment",
+    tags=["Implication Comment"]
+)
+
 # Migration and Seeder Routes
 app.include_router(
     migration_router,
@@ -151,6 +194,12 @@ async def root() -> APIResponse:
             "projects": "/api/v1/projects",
             "global_keywords": "/api/v1/global-keywords",
             "global_base_urls": "/api/v1/global-base-urls",
+            "content_repository": "/api/v1/content-repository",
+            "content_summary": "/api/v1/content-summary",
+            "content_insight": "/api/v1/content-insight",
+            "content_implication": "/api/v1/content-implication",
+            "insight_comment": "/api/v1/insight-comment",
+            "implication_comment": "/api/v1/implication-comment",
             "migrations": "/api/v1/migrations",
             "seeders": "/api/v1/seeders",
             "health": "/health",
