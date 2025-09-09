@@ -61,52 +61,33 @@ class CreateProjectRequestWithDetails(BaseModel):
     base_urls: List[BaseUrlRequest] = Field(default=[], description="List of base URLs for monitoring")
 
 # Project CRUD Operations
-@router.post("/",
-            response_model=APIResponse,
-            status_code=status.HTTP_201_CREATED,
-            summary="Create project",
-            description="Create a new project with metadata and configuration")
-async def create_project(project_data: CreateProjectRequest, request: Request) -> APIResponse:
-    """Create a new project"""
-    request_id = get_request_id(request)
-    logger.info(f"Create project request: {project_data.name}")
-    
-    response = await get_project_controller().create_project(
-        name=project_data.name,
-        created_by=project_data.created_by,
-        description=project_data.description,
-        status=project_data.status,
-        project_metadata=project_data.project_metadata,
-        module_config=project_data.module_config,
-        request_id=request_id
-    )
-    
-    if response.status == "error":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=safe_response_detail(response)
-        )
-    
-    return response
-
-@router.get("/{project_id}",
-           response_model=APIResponse,
-           summary="Get project by ID",
-           description="Retrieve project information by project ID")
-async def get_project(project_id: str, request: Request) -> APIResponse:
-    """Get project by ID"""
-    request_id = get_request_id(request)
-    logger.info(f"Get project request: {project_id}")
-    
-    response = await get_project_controller().get_project_by_id(project_id, request_id)
-    
-    if response.status == "error":
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=safe_response_detail(response)
-        )
-    
-    return response
+# @router.post("/",
+#             response_model=APIResponse,
+#             status_code=status.HTTP_201_CREATED,
+#             summary="Create project",
+#             description="Create a new project with metadata and configuration")
+# async def create_project(project_data: CreateProjectRequest, request: Request) -> APIResponse:
+#     """Create a new project"""
+#     request_id = get_request_id(request)
+#     logger.info(f"Create project request: {project_data.name}")
+#
+#     response = await get_project_controller().create_project(
+#         name=project_data.name,
+#         created_by=project_data.created_by,
+#         description=project_data.description,
+#         status=project_data.status,
+#         project_metadata=project_data.project_metadata,
+#         module_config=project_data.module_config,
+#         request_id=request_id
+#     )
+#
+#     if response.status == "error":
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=safe_response_detail(response)
+#         )
+#
+#     return response
 
 @router.get("/",
            response_model=APIResponse,
@@ -129,6 +110,107 @@ async def get_projects_by_query(
         limit=limit,
         request_id=request_id
     )
+    
+    return response
+
+# Project Recent Feeds API
+@router.get("/recent-feeds",
+           response_model=APIResponse,
+           summary="Get recent content feeds",
+           description="Get recent content summary data with insights and implications count for latest projects")
+async def get_recent_content_feeds(request: Request) -> APIResponse:
+    """Get recent content feeds with insights and implications count"""
+    request_id = get_request_id(request)
+    logger.info("Get recent content feeds request")
+    
+    response = await get_project_controller().get_recent_content_feeds(request_id)
+    
+    if response.status == "error":
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=safe_response_detail(response)
+        )
+    
+    return response
+
+# Dashboard Statistics APIs
+@router.get("/statistics/dashboard",
+           response_model=APIResponse,
+           summary="Get dashboard statistics",
+           description="Get comprehensive dashboard statistics including project count, global keywords, URLs, insights, and implications")
+async def get_dashboard_statistics(request: Request) -> APIResponse:
+    """Get comprehensive dashboard statistics for reporting"""
+    request_id = get_request_id(request)
+    logger.info("Get dashboard statistics request")
+    
+    response = await get_project_controller().get_dashboard_statistics(request_id)
+    
+    if response.status == "error":
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=safe_response_detail(response)
+        )
+    
+    return response
+
+@router.get("/statistics/project-breakdown",
+           response_model=APIResponse,
+           summary="Get project breakdown statistics",
+           description="Get detailed project breakdown statistics with per-project insights and implications count")
+async def get_project_breakdown_statistics(
+    request: Request,
+    limit: Optional[int] = Query(None, ge=1, le=settings.MAX_PAGE_SIZE, 
+                                description="Maximum number of projects to include")
+) -> APIResponse:
+    """Get detailed project breakdown statistics"""
+    request_id = get_request_id(request)
+    logger.info("Get project breakdown statistics request")
+    
+    response = await get_project_controller().get_project_breakdown_statistics(limit, request_id)
+    
+    if response.status == "error":
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=safe_response_detail(response)
+        )
+    
+    return response
+
+@router.get("/statistics/global-resources",
+           response_model=APIResponse,
+           summary="Get global resources statistics",
+           description="Get detailed statistics about global resources (keywords and URLs)")
+async def get_global_resources_statistics(request: Request) -> APIResponse:
+    """Get global resources statistics (keywords and URLs)"""
+    request_id = get_request_id(request)
+    logger.info("Get global resources statistics request")
+    
+    response = await get_project_controller().get_global_resources_statistics(request_id)
+    
+    if response.status == "error":
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=safe_response_detail(response)
+        )
+    
+    return response
+
+@router.get("/{project_id}",
+           response_model=APIResponse,
+           summary="Get project by ID",
+           description="Retrieve project information by project ID")
+async def get_project(project_id: str, request: Request) -> APIResponse:
+    """Get project by ID"""
+    request_id = get_request_id(request)
+    logger.info(f"Get project request: {project_id}")
+    
+    response = await get_project_controller().get_project_by_id(project_id, request_id)
+    
+    if response.status == "error":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=safe_response_detail(response)
+        )
     
     return response
 

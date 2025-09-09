@@ -112,12 +112,29 @@ class BaseRepository(ABC):
                 if filter_expression:
                     scan_kwargs['FilterExpression'] = filter_expression
             
-            # Add limit if provided
-            if limit:
-                scan_kwargs['Limit'] = limit
-            
-            response = self.table.scan(**scan_kwargs)
-            items = response.get('Items', [])
+            # DynamoDB Limit applies to items examined, not filtered results
+            # When using filters, we need to scan without limit and apply limit in code
+            if query and limit:
+                # Scan without limit when filters are present
+                all_items = []
+                response = self.table.scan(**scan_kwargs)
+                all_items.extend(response.get('Items', []))
+                
+                # Handle pagination to get all matching items
+                while 'LastEvaluatedKey' in response and len(all_items) < limit * 10:  # Reasonable upper bound
+                    scan_kwargs['ExclusiveStartKey'] = response['LastEvaluatedKey']
+                    response = self.table.scan(**scan_kwargs)
+                    all_items.extend(response.get('Items', []))
+                
+                # Apply limit in application code
+                items = all_items[:limit]
+            else:
+                # No filters or no limit - use DynamoDB limit directly
+                if limit and not query:
+                    scan_kwargs['Limit'] = limit
+                
+                response = self.table.scan(**scan_kwargs)
+                items = response.get('Items', [])
             
             self.logger.info(f"Find all query in {self.table_name} - Items: {len(items)}")
             return items
@@ -154,3 +171,34 @@ class BaseRepository(ABC):
         except Exception as e:
             self.logger.error(f"Exists check failed in {self.table_name}: {str(e)}")
             raise Exception(f"Error checking if item exists: {str(e)}")
+    
+    async def count_by_query(self, query: Optional[Dict[str, Any]] = None) -> int:
+        """Count items matching the query without retrieving all data"""
+        try:
+            self.logger.debug(f"Count query in {self.table_name} - Query: {query}")
+            
+            scan_kwargs = {'Select': 'COUNT'}
+            
+            # Add filter if query provided
+            if query:
+                filter_expression = self._build_filter_expression(query)
+                if filter_expression:
+                    scan_kwargs['FilterExpression'] = filter_expression
+            
+            # Scan and count items
+            total_count = 0
+            response = self.table.scan(**scan_kwargs)
+            total_count += response.get('Count', 0)
+            
+            # Handle pagination to get complete count
+            while 'LastEvaluatedKey' in response:
+                scan_kwargs['ExclusiveStartKey'] = response['LastEvaluatedKey']
+                response = self.table.scan(**scan_kwargs)
+                total_count += response.get('Count', 0)
+            
+            self.logger.info(f"Count query in {self.table_name} - Total: {total_count}")
+            return total_count
+            
+        except Exception as e:
+            self.logger.error(f"Count failed in {self.table_name}: {str(e)}")
+            raise Exception(f"Error counting items: {str(e)}")
