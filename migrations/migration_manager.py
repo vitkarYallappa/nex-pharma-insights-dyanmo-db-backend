@@ -132,7 +132,9 @@ class MigrationManager:
         migration_files = []
         
         for file_path in self.migrations_dir.glob("*.py"):
-            if file_path.name.startswith("migration_") and file_path.name != "__init__.py":
+            if (file_path.name.startswith("migration_") and 
+                file_path.name != "__init__.py" and 
+                file_path.name != "migration_manager.py"):
                 migration_files.append(file_path.stem)
         
         migration_files.sort()  # Sort alphabetically/chronologically
