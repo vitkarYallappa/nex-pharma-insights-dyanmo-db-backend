@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     REDOC_URL: str = "/redoc"
     
     # CORS Configuration
-    CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:8000", "http://localhost:8001", "http://localhost:8002"]
+    CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:8000", "http://localhost:8001", "http://localhost:8002","http://localhost:5173"]
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: list = ["*"]
     CORS_ALLOW_HEADERS: list = ["*"]
