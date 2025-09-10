@@ -7,6 +7,8 @@ Follows the same pattern as UserController for consistency
 from typing import List, Optional, Dict, Any
 from app.services.project_service import ProjectService, ProjectNotFoundException, ProjectAlreadyExistsException
 from app.use_cases.project_request_creation_service import ProjectRequestCreationOrchestrator, ProjectRequestCreationException
+from app.use_cases.project_recent_feeds_service import ProjectRecentFeedsService
+from app.use_cases.project_statistics_service import ProjectStatisticsService
 from app.core.response import ResponseFormatter, APIResponse, to_response_format
 from app.core.logging import get_logger
 from app.core.exceptions import ValidationException
@@ -19,6 +21,8 @@ class ProjectController:
     def __init__(self):
         self.project_service = ProjectService()
         self.project_request_orchestrator = ProjectRequestCreationOrchestrator()
+        self.project_recent_feeds_service = ProjectRecentFeedsService()
+        self.project_statistics_service = ProjectStatisticsService()
         self.logger = logger
     
     async def create_project(self, name: str, created_by: str, description: Optional[str] = None,
@@ -195,6 +199,134 @@ class ProjectController:
             self.logger.error(f"Unexpected error during project request creation: {str(e)}")
             return ResponseFormatter.error(
                 message="Internal server error during project request creation",
+                errors=[{"error": str(e)}],
+                request_id=request_id
+            )
+    
+    async def get_recent_content_feeds(self, request_id: Optional[str] = None) -> APIResponse:
+        """Get recent content feeds with insights and implications count"""
+        try:
+            self.logger.info("Starting recent content feeds retrieval")
+            
+            # Execute through the use case layer
+            result = await self.project_recent_feeds_service.get_recent_feeds()
+            
+            self.logger.info(f"Recent content feeds retrieval completed - {result['total_projects']} projects processed")
+            
+            return ResponseFormatter.success(
+                data=result,
+                message=result.get('message', 'Recent content feeds retrieved successfully'),
+                request_id=request_id
+            )
+            
+        except ValidationException as e:
+            self.logger.error(f"Recent content feeds validation failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "validation", "message": str(e)}],
+                request_id=request_id
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Unexpected error during recent content feeds retrieval: {str(e)}")
+            return ResponseFormatter.error(
+                message="Internal server error during recent content feeds retrieval",
+                errors=[{"error": str(e)}],
+                request_id=request_id
+            )
+    
+    async def get_dashboard_statistics(self, request_id: Optional[str] = None) -> APIResponse:
+        """Get comprehensive dashboard statistics for reporting"""
+        try:
+            self.logger.info("Starting dashboard statistics retrieval")
+            
+            # Execute through the use case layer
+            result = await self.project_statistics_service.get_dashboard_statistics()
+            
+            self.logger.info("Dashboard statistics retrieval completed successfully")
+            
+            return ResponseFormatter.success(
+                data=result,
+                message=result.get('message', 'Dashboard statistics retrieved successfully'),
+                request_id=request_id
+            )
+            
+        except ValidationException as e:
+            self.logger.error(f"Dashboard statistics validation failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "validation", "message": str(e)}],
+                request_id=request_id
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Unexpected error during dashboard statistics retrieval: {str(e)}")
+            return ResponseFormatter.error(
+                message="Internal server error during dashboard statistics retrieval",
+                errors=[{"error": str(e)}],
+                request_id=request_id
+            )
+    
+    async def get_project_breakdown_statistics(self, limit: Optional[int] = None, request_id: Optional[str] = None) -> APIResponse:
+        """Get detailed project breakdown statistics"""
+        try:
+            self.logger.info("Starting project breakdown statistics retrieval")
+            
+            # Execute through the use case layer
+            result = await self.project_statistics_service.get_project_breakdown_statistics(limit=limit)
+            
+            self.logger.info("Project breakdown statistics retrieval completed successfully")
+            
+            return ResponseFormatter.success(
+                data=result,
+                message=result.get('message', 'Project breakdown statistics retrieved successfully'),
+                request_id=request_id
+            )
+            
+        except ValidationException as e:
+            self.logger.error(f"Project breakdown statistics validation failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "validation", "message": str(e)}],
+                request_id=request_id
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Unexpected error during project breakdown statistics retrieval: {str(e)}")
+            return ResponseFormatter.error(
+                message="Internal server error during project breakdown statistics retrieval",
+                errors=[{"error": str(e)}],
+                request_id=request_id
+            )
+    
+    async def get_global_resources_statistics(self, request_id: Optional[str] = None) -> APIResponse:
+        """Get global resources statistics (keywords and URLs)"""
+        try:
+            self.logger.info("Starting global resources statistics retrieval")
+            
+            # Execute through the use case layer
+            result = await self.project_statistics_service.get_global_resources_statistics()
+            
+            self.logger.info("Global resources statistics retrieval completed successfully")
+            
+            return ResponseFormatter.success(
+                data=result,
+                message=result.get('message', 'Global resources statistics retrieved successfully'),
+                request_id=request_id
+            )
+            
+        except ValidationException as e:
+            self.logger.error(f"Global resources statistics validation failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "validation", "message": str(e)}],
+                request_id=request_id
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Unexpected error during global resources statistics retrieval: {str(e)}")
+            return ResponseFormatter.error(
+                message="Internal server error during global resources statistics retrieval",
                 errors=[{"error": str(e)}],
                 request_id=request_id
             )
