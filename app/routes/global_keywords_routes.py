@@ -97,4 +97,27 @@ async def get_all_global_keywords_by_query(
         request_id=request_id
     )
     
+    return response
+
+@router.delete("/{keyword_id}",
+              response_model=APIResponse,
+              status_code=status.HTTP_200_OK,
+              summary="Delete global keyword",
+              description="Delete a global keyword by ID")
+async def delete_global_keyword(keyword_id: str, request: Request) -> APIResponse:
+    """Delete a global keyword by ID"""
+    request_id = get_request_id(request)
+    logger.info(f"Delete global keyword request: {keyword_id}")
+    
+    response = await get_global_keywords_controller().delete_global_keyword(
+        keyword_id=keyword_id,
+        request_id=request_id
+    )
+    
+    if response.status == "error":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=safe_response_detail(response)
+        )
+    
     return response 

@@ -121,4 +121,28 @@ class GlobalKeywordsService:
             raise
         except Exception as e:
             self.logger.error(f"Update global keyword failed: {str(e)}")
+            raise
+    
+    async def delete_global_keyword(self, keyword_id: str) -> bool:
+        """Delete global keyword by ID"""
+        try:
+            if not keyword_id or not keyword_id.strip():
+                raise ValidationException("Keyword ID is required")
+            
+            # Check if keyword exists
+            await self.get_global_keyword_by_id(keyword_id)
+            
+            # Delete the keyword
+            deleted = await self.keywords_repository.delete_global_keyword(keyword_id.strip())
+            
+            if not deleted:
+                raise GlobalKeywordsNotFoundException(f"Failed to delete global keyword with ID {keyword_id}")
+            
+            self.logger.info(f"Global keyword deleted: {keyword_id}")
+            return True
+            
+        except (GlobalKeywordsNotFoundException, ValidationException):
+            raise
+        except Exception as e:
+            self.logger.error(f"Delete global keyword failed: {str(e)}")
             raise 

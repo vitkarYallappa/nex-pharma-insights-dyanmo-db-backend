@@ -110,6 +110,49 @@ class GlobalKeywordsController:
                 request_id=request_id
             )
     
+    async def delete_global_keyword(self, keyword_id: str, request_id: Optional[str] = None) -> APIResponse:
+        """Delete global keyword by ID"""
+        try:
+            deleted = await self.global_keywords_service.delete_global_keyword(keyword_id)
+            
+            if deleted:
+                self.logger.info(f"Global keyword deleted successfully: {keyword_id}")
+                return ResponseFormatter.deleted(
+                    message=f"Global keyword with ID '{keyword_id}' deleted successfully",
+                    request_id=request_id
+                )
+            else:
+                self.logger.warning(f"Global keyword deletion failed: {keyword_id}")
+                return ResponseFormatter.error(
+                    message="Failed to delete global keyword",
+                    errors=[{"field": "keyword_id", "message": "Global keyword not found or deletion failed"}],
+                    request_id=request_id
+                )
+            
+        except ValidationException as e:
+            self.logger.error(f"Global keyword deletion validation failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "validation", "message": str(e)}],
+                request_id=request_id
+            )
+            
+        except GlobalKeywordsNotFoundException as e:
+            self.logger.error(f"Global keyword deletion failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "keyword_id", "message": "Global keyword not found"}],
+                request_id=request_id
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Global keyword deletion failed: {str(e)}")
+            return ResponseFormatter.error(
+                message="Failed to delete global keyword",
+                errors=[{"error": str(e)}],
+                request_id=request_id
+            )
+    
     async def get_all_global_keywords_by_query(self, keyword_type: Optional[str] = None,
                                               limit: Optional[int] = None,
                                               request_id: Optional[str] = None) -> APIResponse:

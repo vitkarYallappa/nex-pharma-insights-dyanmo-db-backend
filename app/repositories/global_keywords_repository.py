@@ -42,4 +42,21 @@ class GlobalKeywordsRepository(BaseRepository):
     async def update_global_keyword(self, keyword_id: str, update_data: Dict[str, Any]) -> Optional[GlobalKeywordsModel]:
         """Update global keyword by ID"""
         updated_data = await super().update_by_query({"pk": keyword_id}, update_data)
-        return GlobalKeywordsModel.from_dict(updated_data) if updated_data else None 
+        return GlobalKeywordsModel.from_dict(updated_data) if updated_data else None
+    
+    async def delete_global_keyword(self, keyword_id: str) -> bool:
+        """Delete global keyword by ID"""
+        try:
+            # First check if keyword exists
+            existing_keyword = await self.find_one_by_query({"pk": keyword_id})
+            if not existing_keyword:
+                return False
+            
+            # Delete the keyword
+            self.table.delete_item(Key={"pk": keyword_id})
+            self.logger.info(f"Deleted global keyword: {keyword_id}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Delete global keyword failed: {str(e)}")
+            raise Exception(f"Error deleting global keyword: {str(e)}") 
