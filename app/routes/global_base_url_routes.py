@@ -115,3 +115,27 @@ async def get_global_base_urls_by_query(
     )
 
     return response
+
+
+@router.delete("/{url_id}",
+              response_model=APIResponse,
+              status_code=status.HTTP_200_OK,
+              summary="Delete global base URL",
+              description="Delete a global base URL by ID")
+async def delete_global_base_url(url_id: str, request: Request) -> APIResponse:
+    """Delete a global base URL by ID"""
+    request_id = get_request_id(request)
+    logger.info(f"Delete global base URL request: {url_id}")
+    
+    response = await get_global_base_url_controller().delete_global_base_url(
+        url_id=url_id,
+        request_id=request_id
+    )
+    
+    if response.status == "error":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=safe_response_detail(response)
+        )
+    
+    return response

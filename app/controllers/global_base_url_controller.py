@@ -169,3 +169,46 @@ class GlobalBaseUrlController:
                 errors=[{"error": str(e)}],
                 request_id=request_id
             )
+    
+    async def delete_global_base_url(self, url_id: str, request_id: Optional[str] = None) -> APIResponse:
+        """Delete global base URL by ID"""
+        try:
+            deleted = await self.global_base_url_service.delete_global_base_url(url_id)
+            
+            if deleted:
+                self.logger.info(f"Global base URL deleted successfully: {url_id}")
+                return ResponseFormatter.deleted(
+                    message=f"Global base URL with ID '{url_id}' deleted successfully",
+                    request_id=request_id
+                )
+            else:
+                self.logger.warning(f"Global base URL deletion failed: {url_id}")
+                return ResponseFormatter.error(
+                    message="Failed to delete global base URL",
+                    errors=[{"field": "url_id", "message": "Global base URL not found or deletion failed"}],
+                    request_id=request_id
+                )
+            
+        except ValidationException as e:
+            self.logger.error(f"Global base URL deletion validation failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "validation", "message": str(e)}],
+                request_id=request_id
+            )
+            
+        except GlobalBaseUrlsNotFoundException as e:
+            self.logger.error(f"Global base URL deletion failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "url_id", "message": "Global base URL not found"}],
+                request_id=request_id
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Global base URL deletion failed: {str(e)}")
+            return ResponseFormatter.error(
+                message="Failed to delete global base URL",
+                errors=[{"error": str(e)}],
+                request_id=request_id
+            )

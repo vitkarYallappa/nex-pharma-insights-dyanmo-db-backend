@@ -55,3 +55,20 @@ class GlobalBaseUrlsRepository(BaseRepository):
         """Update global base URL by ID"""
         updated_data = await super().update_by_query({"pk": url_id}, update_data)
         return GlobalBaseUrlsModel.from_dict(updated_data) if updated_data else None
+    
+    async def delete_global_base_url(self, url_id: str) -> bool:
+        """Delete global base URL by ID"""
+        try:
+            # First check if URL exists
+            existing_url = await self.find_one_by_query({"pk": url_id})
+            if not existing_url:
+                return False
+            
+            # Delete the URL
+            self.table.delete_item(Key={"pk": url_id})
+            self.logger.info(f"Deleted global base URL: {url_id}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Delete global base URL failed: {str(e)}")
+            raise Exception(f"Error deleting global base URL: {str(e)}")

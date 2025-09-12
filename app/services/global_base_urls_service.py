@@ -140,3 +140,27 @@ class GlobalBaseUrlsService:
         except Exception as e:
             self.logger.error(f"Update global base URL failed: {str(e)}")
             raise
+    
+    async def delete_global_base_url(self, url_id: str) -> bool:
+        """Delete global base URL by ID"""
+        try:
+            if not url_id or not url_id.strip():
+                raise ValidationException("URL ID is required")
+            
+            # Check if URL exists
+            await self.get_global_base_url_by_id(url_id)
+            
+            # Delete the URL
+            deleted = await self.urls_repository.delete_global_base_url(url_id.strip())
+            
+            if not deleted:
+                raise GlobalBaseUrlsNotFoundException(f"Failed to delete global base URL with ID {url_id}")
+            
+            self.logger.info(f"Global base URL deleted: {url_id}")
+            return True
+            
+        except (GlobalBaseUrlsNotFoundException, ValidationException):
+            raise
+        except Exception as e:
+            self.logger.error(f"Delete global base URL failed: {str(e)}")
+            raise
