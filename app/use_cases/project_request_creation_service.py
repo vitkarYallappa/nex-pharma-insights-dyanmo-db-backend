@@ -124,18 +124,7 @@ class ProjectRequestCreationOrchestrator:
             # Step 7: Generate Dummy Content Data
             self.logger.info(f"[{orchestration_id}] Step 7: Generating dummy content data")
             try:
-                dummy_content_results = await self.content_dummy_service.generate_dummy_content(
-                    project_id=project.pk,
-                    request_id=request.pk
-                )
-                created_entities["dummy_content"] = dummy_content_results
-                self.logger.info(
-                    f"[{orchestration_id}] Dummy content generated successfully - "
-                    f"Items: {dummy_content_results['items_processed']}, "
-                    f"Insights: {dummy_content_results['total_insights']}, "
-                    f"Implications: {dummy_content_results['total_implications']}, "
-                    f"Summaries: {dummy_content_results['total_summaries']}"
-                )
+               pass
             except Exception as content_error:
                 self.logger.warning(f"[{orchestration_id}] Dummy content generation failed: {str(content_error)}")
                 # Don't fail the entire process if dummy content generation fails
