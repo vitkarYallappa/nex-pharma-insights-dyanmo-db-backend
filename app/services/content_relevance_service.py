@@ -178,6 +178,58 @@ class ContentRelevanceService:
             self.logger.error(f"Update relevance entry failed: {str(e)}")
             raise
     
+    async def update_relevance_by_content_id(self, content_id: str, is_relevant: bool, 
+                                            relevance_text: Optional[str] = None,
+                                            relevance_score: Optional[float] = None,
+                                            confidence_score: Optional[float] = None,
+                                            relevance_category: Optional[str] = None,
+                                            updated_by: str = "user") -> ContentRelevanceModel:
+        """Update content relevance by content ID - for user-based updates"""
+        try:
+            if not content_id or not content_id.strip():
+                raise ValidationException("Content ID is required")
+            
+            # Find existing relevance by content ID
+            existing_relevance = await self.get_relevance_by_content_id(content_id.strip())
+            
+            if not existing_relevance:
+                raise ContentRelevanceNotFoundException(f"No relevance entry found for content ID {content_id}")
+            
+            # Prepare update data
+            update_data = {
+                "is_relevant": is_relevant,
+                "updated_by": updated_by.strip() if updated_by else "user"
+            }
+            
+            # Add optional fields if provided
+            if relevance_text is not None:
+                update_data["relevance_text"] = relevance_text.strip()
+            
+            if relevance_score is not None:
+                if not (0.0 <= relevance_score <= 1.0):
+                    raise ValidationException("Relevance score must be between 0.0 and 1.0")
+                update_data["relevance_score"] = relevance_score
+            
+            if confidence_score is not None:
+                if not (0.0 <= confidence_score <= 1.0):
+                    raise ValidationException("Confidence score must be between 0.0 and 1.0")
+                update_data["confidence_score"] = confidence_score
+            
+            if relevance_category is not None:
+                update_data["relevance_category"] = relevance_category.strip()
+            
+            # Update the relevance entry
+            updated_relevance = await self.update_relevance(existing_relevance.pk, update_data)
+            
+            self.logger.info(f"Content relevance updated by {updated_by} for content {content_id}: is_relevant={is_relevant}")
+            return updated_relevance
+            
+        except (ValidationException, ContentRelevanceNotFoundException):
+            raise
+        except Exception as e:
+            self.logger.error(f"Update relevance by content ID failed: {str(e)}")
+            raise
+    
     async def get_all_relevance(self, content_id: Optional[str] = None,
                               url_id: Optional[str] = None,
                               is_relevant: Optional[bool] = None,

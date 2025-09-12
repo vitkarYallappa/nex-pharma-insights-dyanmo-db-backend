@@ -5,6 +5,7 @@ Clean and minimal repository with just the required methods
 
 from abc import ABC
 from typing import Dict, List, Optional, Any
+from decimal import Decimal
 from app.core.database import dynamodb_client
 from app.core.logging import get_logger
 from boto3.dynamodb.conditions import Attr
@@ -151,8 +152,21 @@ class BaseRepository(ABC):
                 self.logger.warning(f"No item found to update in {self.table_name}")
                 return None
             
-            # Update the item
-            updated_item = {**item, **update_data}
+            # Update the item - handle case where item might be a model object
+            if hasattr(item, 'to_dict'):
+                item_dict = item.to_dict()
+            elif isinstance(item, dict):
+                item_dict = item
+            else:
+                item_dict = dict(item)
+            
+            updated_item = {**item_dict, **update_data}
+            
+            # Convert float values to Decimal for DynamoDB compatibility
+            for key, value in updated_item.items():
+                if isinstance(value, float):
+                    updated_item[key] = Decimal(str(value))
+            
             self.table.put_item(Item=updated_item)
             
             self.logger.info(f"Updated item in {self.table_name}")

@@ -15,6 +15,7 @@ from app.repositories.global_keywords_repository import GlobalKeywordsRepository
 from app.repositories.global_base_urls_repository import GlobalBaseUrlsRepository
 from app.repositories.content_insight_repository import ContentInsightRepository
 from app.repositories.content_implication_repository import ContentImplicationRepository
+from app.repositories.content_relevance_repository import ContentRelevanceRepository
 from app.core.logging import get_logger
 from app.core.exceptions import ValidationException
 
@@ -29,6 +30,7 @@ class ProjectStatisticsService:
         self.global_base_urls_repository = GlobalBaseUrlsRepository()
         self.content_insight_repository = ContentInsightRepository()
         self.content_implication_repository = ContentImplicationRepository()
+        self.content_relevance_repository = ContentRelevanceRepository()
         self.logger = logger
     
     async def get_dashboard_statistics(self) -> Dict[str, Any]:
@@ -55,6 +57,11 @@ class ProjectStatisticsService:
             
             # Calculate active global URLs
             active_global_urls_count = await self.global_base_urls_repository.count_by_query({"is_active": True})
+            
+            # Calculate relevance statistics
+            relevant_count = await self.content_relevance_repository.count_by_query({"is_relevant": True})
+            non_relevant_count = await self.content_relevance_repository.count_by_query({"is_relevant": False})
+            total_relevance_count = relevant_count + non_relevant_count
 
             statistics = {
                 "projects_details": {
@@ -65,6 +72,12 @@ class ProjectStatisticsService:
                     "total_insights": insights_count,
                     "total_implications": implications_count,
                 },
+                "content_relevance_details": {
+                    "total_content": total_relevance_count,
+                    "relevant_content": relevant_count,
+                    "non_relevant_content": non_relevant_count,
+                    "relevance_percentage": round((relevant_count / total_relevance_count * 100), 2) if total_relevance_count > 0 else 0
+                },
                 "global_resources": {
                     "keywords": global_keywords_count,
                     "urls": global_urls_count,
@@ -74,7 +87,7 @@ class ProjectStatisticsService:
                     "generated_at": datetime.utcnow().isoformat() + "Z"
                 }
             }
-            self.logger.info(f"Dashboard statistics generated successfully - Projects: {project_count}, Keywords: {global_keywords_count}, URLs: {global_urls_count}, Insights: {insights_count}, Implications: {implications_count}")
+            self.logger.info(f"Dashboard statistics generated successfully - Projects: {project_count}, Keywords: {global_keywords_count}, URLs: {global_urls_count}, Insights: {insights_count}, Implications: {implications_count}, Relevant: {relevant_count}, Non-relevant: {non_relevant_count}")
             
             return statistics
             
