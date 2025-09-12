@@ -26,12 +26,16 @@ class ProjectRecentFeedsService:
         self.content_implication_service = ContentImplicationService()
         self.logger = logger
     
-    async def get_recent_feeds(self) -> Dict[str, Any]:
+    async def get_recent_feeds(self, limit: int = 5) -> Dict[str, Any]:
         """
         Get recent content feeds:
         1. Fetch latest 3 projects
         2. For each project, get latest 2 content summaries
         3. Count insights and implications for each content summary
+        4. Limit total results to maximum 5 items
+        
+        Args:
+            limit: Maximum number of items to return (default: 5)
         
         Returns:
             Dict containing projects with their content summaries and counts
@@ -54,6 +58,11 @@ class ProjectRecentFeedsService:
             
             # Step 2: Process each project
             for project in projects:
+                # Check if we've reached the limit
+                if len(recent_feeds) >= limit:
+                    self.logger.info(f"Reached limit of {limit} items, stopping processing")
+                    break
+                    
                 project_id = project.get("pk") if hasattr(project, 'get') else project.pk
                 project_dict = project.to_dict() if hasattr(project, 'to_dict') else project
                 
@@ -84,6 +93,11 @@ class ProjectRecentFeedsService:
                 
                 # Step 3: Process each content entry
                 for content_entry in content_entries:
+                    # Check if we've reached the limit
+                    if len(recent_feeds) >= limit:
+                        self.logger.info(f"Reached limit of {limit} items, stopping processing")
+                        break
+                        
                     content_id = content_entry.get("pk") if hasattr(content_entry, 'get') else content_entry.pk
                     content_dict = content_entry.to_dict() if hasattr(content_entry, 'to_dict') else content_entry
                     
@@ -98,6 +112,11 @@ class ProjectRecentFeedsService:
                     self.logger.info(f"Found {len(summaries)} summaries for content: {content_id}")
                     
                     for summary in summaries:
+                        # Check if we've reached the limit
+                        if len(recent_feeds) >= limit:
+                            self.logger.info(f"Reached limit of {limit} items, stopping processing")
+                            break
+                            
                         summary_id = summary.get("pk") if hasattr(summary, 'get') else summary.pk
                         summary_dict = summary.to_dict() if hasattr(summary, 'to_dict') else summary
                         
@@ -128,10 +147,10 @@ class ProjectRecentFeedsService:
             result = {
                 "projects": recent_feeds,
                 "total_projects": len(recent_feeds),
-                "message": f"Retrieved recent feeds for {len(recent_feeds)} projects"
+                "message": f"Retrieved recent feeds for {len(recent_feeds)} projects (limited to {limit})"
             }
             
-            self.logger.info(f"Recent feeds retrieval completed: {len(recent_feeds)} projects processed")
+            self.logger.info(f"Recent feeds retrieval completed: {len(recent_feeds)} projects processed (limited to {limit})")
             return result
             
         except ValidationException:

@@ -203,13 +203,13 @@ class ProjectController:
                 request_id=request_id
             )
     
-    async def get_recent_content_feeds(self, request_id: Optional[str] = None) -> APIResponse:
-        """Get recent content feeds with insights and implications count"""
+    async def get_recent_content_feeds(self, limit: Optional[int] = 5, request_id: Optional[str] = None) -> APIResponse:
+        """Get recent content feeds with insights and implications count (limited to maximum 5 items)"""
         try:
             self.logger.info("Starting recent content feeds retrieval")
             
-            # Execute through the use case layer
-            result = await self.project_recent_feeds_service.get_recent_feeds()
+            # Execute through the use case layer with limit
+            result = await self.project_recent_feeds_service.get_recent_feeds(limit=limit)
             
             self.logger.info(f"Recent content feeds retrieval completed - {result['total_projects']} projects processed")
             

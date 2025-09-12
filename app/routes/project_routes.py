@@ -117,13 +117,16 @@ async def get_projects_by_query(
 @router.get("/recent-feeds",
            response_model=APIResponse,
            summary="Get recent content feeds",
-           description="Get recent content summary data with insights and implications count for latest projects")
-async def get_recent_content_feeds(request: Request) -> APIResponse:
-    """Get recent content feeds with insights and implications count"""
+           description="Get recent content summary data with insights and implications count for latest projects (limited to maximum 5 items)")
+async def get_recent_content_feeds(
+    request: Request,
+    limit: Optional[int] = Query(5, ge=1, le=5, description="Maximum number of items to return (max 5)")
+) -> APIResponse:
+    """Get recent content feeds with insights and implications count (limited to maximum 5 items)"""
     request_id = get_request_id(request)
-    logger.info("Get recent content feeds request")
+    logger.info(f"Get recent content feeds request with limit: {limit}")
     
-    response = await get_project_controller().get_recent_content_feeds(request_id)
+    response = await get_project_controller().get_recent_content_feeds(limit=limit, request_id=request_id)
     
     if response.status == "error":
         raise HTTPException(
