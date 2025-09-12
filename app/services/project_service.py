@@ -9,6 +9,7 @@ from app.models.project_model import ProjectModel
 from app.services.requests_service import RequestsService
 from app.services.keywords_service import KeywordsService
 from app.services.source_urls_service import SourceUrlsService
+from app.services.content_repository_service import ContentRepositoryService
 from app.core.logging import get_logger
 from app.core.exceptions import (
     UserNotFoundException,
@@ -33,6 +34,7 @@ class ProjectService:
         self.requests_service = RequestsService()
         self.keywords_service = KeywordsService()
         self.source_urls_service = SourceUrlsService()
+        self.content_repository_service = ContentRepositoryService()
         self.logger = logger
     
     async def create_project(self, name: str, created_by: str, description: Optional[str] = None,
@@ -149,6 +151,10 @@ class ProjectService:
                 source_urls = await self.source_urls_service.get_source_urls_by_query(request_id=request_id)
                 source_urls_count = len(source_urls)
                 
+                # Get content repository count for this project
+                content_repositories = await self.content_repository_service.get_all_content_repository(project_id=project_id)
+                content_repository_count = len(content_repositories)
+                
                 # Create request info
                 request_info = {
                     "request_id": request_id,
@@ -158,7 +164,8 @@ class ProjectService:
                     # "priority": request_dict.get("priority"),
                     "keywords_count": keywords_count,
                     "keywords_list": keywords,
-                    "source_urls_count": source_urls_count
+                    "source_urls_count": source_urls_count,
+                    "content_repository_count": content_repository_count
                 }
                 
                 # Update project with request data

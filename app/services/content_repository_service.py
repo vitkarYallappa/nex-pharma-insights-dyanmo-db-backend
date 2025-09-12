@@ -4,8 +4,12 @@ Follows the same pattern as ProjectService for consistency
 """
 
 from typing import List, Optional, Dict, Any
+import uuid
+from datetime import datetime, timedelta
 from app.repositories.content_repository_repository import ContentRepositoryRepository
 from app.models.content_repository_model import ContentRepositoryModel
+from app.services.content_repository_metadata_service import ContentRepositoryMetadataService
+from app.services.content_relevance_service import ContentRelevanceService
 from app.core.logging import get_logger
 from app.core.exceptions import (
     ValidationException
@@ -26,6 +30,8 @@ class ContentRepositoryService:
     
     def __init__(self):
         self.content_repository = ContentRepositoryRepository()
+        self.metadata_service = ContentRepositoryMetadataService()
+        self.relevance_service = ContentRelevanceService()
         self.logger = logger
     
     async def create_content_repository(self, request_id: str, project_id: str, canonical_url: str, title: str,
@@ -158,8 +164,8 @@ class ContentRepositoryService:
             self.logger.error(f"Update content repository entry failed: {str(e)}")
             raise
     
-    async def get_all_by_query(self, query_filters: Optional[Dict[str, Any]] = None, limit: Optional[int] = None) -> List[ContentRepositoryModel]:
-        """Get all content repository entries by query filters"""
+    async def get_all_by_query(self, query_filters: Optional[Dict[str, Any]] = None, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Get all content repository entries by query filters with enhanced metadata"""
         try:
             # Validate limit if provided
             if limit is not None and limit <= 0:
@@ -168,19 +174,79 @@ class ContentRepositoryService:
             # Get entries from repository
             entries = await self.content_repository.find_all_by_query(query=query_filters, limit=limit)
             
-            # Convert to model objects - check if entries are already model objects or dicts
-            content_models = []
+            # Convert to model objects and enhance with additional metadata
+            enhanced_content_list = []
             for entry in entries:
                 if isinstance(entry, ContentRepositoryModel):
-                    content_models.append(entry)
+                    content_model = entry
                 else:
-                    content_models.append(ContentRepositoryModel.from_dict(entry))
+                    content_model = ContentRepositoryModel.from_dict(entry)
+                
+                # Enhance content and convert to dict with all fields
+                enhanced_content = await self._enhance_content_with_metadata(content_model)
+                enhanced_content_list.append(enhanced_content)
             
-            self.logger.info(f"Retrieved {len(content_models)} content repository entries with filters: {query_filters}")
-            return content_models
+            self.logger.info(f"Retrieved {len(enhanced_content_list)} content repository entries with enhanced metadata")
+            return enhanced_content_list
             
         except ValidationException:
             raise
         except Exception as e:
             self.logger.error(f"Get content repository entries by query failed: {str(e)}")
-            raise 
+            raise
+    
+    async def _enhance_content_with_metadata(self, content_model: ContentRepositoryModel) -> Dict[str, Any]:
+        """Add three keys to existing content object and return as dict with all fields accessible"""
+        try:
+            # Start with all existing content model fields
+            content_dict = content_model.to_dict()
+            
+            # Check if metadata exists for this content
+            existing_metadata = await self.metadata_service.get_metadata_by_content_id(content_model.pk, limit=1)
+            
+            # Add publish_date (one day minus - yesterday)
+            yesterday = datetime.utcnow() - timedelta(days=1)
+            if existing_metadata:
+                # Use existing metadata value if available
+                content_dict['publish_date'] = existing_metadata[0].metadata_value
+            else:
+                # Use yesterday's timestamp as dummy publish date
+                content_dict['publish_date'] = yesterday.isoformat()
+            
+            # Add source_type - use existing or dummy if not found
+            if hasattr(content_model, 'source_type') and content_model.source_type:
+                content_dict['source_type'] = content_model.source_type
+            else:
+                # Add dummy source type when not found
+                content_dict['source_type'] = 'dummy_source'
+            
+            # Check relevance and add relevance_check
+            existing_relevance = await self.relevance_service.get_relevance_by_content_id(content_model.pk)
+            if existing_relevance:
+                content_dict['relevance_check'] = existing_relevance.is_relevant
+            else:
+                # Default to True for dummy relevance check
+                content_dict['relevance_check'] = True
+                
+            self.logger.debug(f"Enhanced content {content_model.pk} with metadata keys")
+            return content_dict
+                
+        except Exception as e:
+            self.logger.warning(f"Failed to enhance content {content_model.pk} with metadata: {str(e)}")
+            # Set default values if enhancement fails - don't let this break the main flow
+            try:
+                content_dict = content_model.to_dict()
+                yesterday = datetime.utcnow() - timedelta(days=1)
+                content_dict['publish_date'] = yesterday.isoformat()
+                content_dict['source_type'] = 'dummy_source'
+                content_dict['relevance_check'] = True
+                return content_dict
+            except Exception as fallback_error:
+                self.logger.warning(f"Fallback enhancement also failed for content {content_model.pk}: {str(fallback_error)}")
+                # Absolute fallback with hardcoded values
+                return {
+                    'pk': getattr(content_model, 'pk', 'unknown'),
+                    'publish_date': '2025-09-11T00:00:00',
+                    'source_type': 'dummy_source',
+                    'relevance_check': True
+                } 

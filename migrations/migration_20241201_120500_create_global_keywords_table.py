@@ -87,28 +87,55 @@ class CreateGlobalKeywordsTableMigration(BaseMigration):
             
             keywords_repo = GlobalKeywordsRepository()
             
-            # Sample pharmaceutical keywords
+            # Obesity and metabolic keywords
             sample_keywords = [
-                {"keyword": "oncology", "keyword_type": "therapeutic_area"},
-                {"keyword": "cardiology", "keyword_type": "therapeutic_area"},
-                {"keyword": "neurology", "keyword_type": "therapeutic_area"},
-                {"keyword": "immunology", "keyword_type": "therapeutic_area"},
-                {"keyword": "pharmacovigilance", "keyword_type": "safety"},
-                {"keyword": "adverse_event", "keyword_type": "safety"},
-                {"keyword": "drug_interaction", "keyword_type": "safety"},
-                {"keyword": "clinical_trial", "keyword_type": "research"},
-                {"keyword": "biomarker", "keyword_type": "research"},
-                {"keyword": "efficacy", "keyword_type": "research"},
-                {"keyword": "FDA_approval", "keyword_type": "regulatory"},
-                {"keyword": "EMA_approval", "keyword_type": "regulatory"},
-                {"keyword": "phase_I", "keyword_type": "clinical_phase"},
-                {"keyword": "phase_II", "keyword_type": "clinical_phase"},
-                {"keyword": "phase_III", "keyword_type": "clinical_phase"},
-                {"keyword": "molecular_target", "keyword_type": "mechanism"},
-                {"keyword": "protein_kinase", "keyword_type": "mechanism"},
-                {"keyword": "receptor_antagonist", "keyword_type": "mechanism"},
-                {"keyword": "market_analysis", "keyword_type": "commercial"},
-                {"keyword": "competitive_landscape", "keyword_type": "commercial"}
+                # Obesity and metabolic therapeutic area
+                {"keyword": "Obesity", "keyword_type": "therapeutic_area"},
+                {"keyword": "Overweight", "keyword_type": "therapeutic_area"},
+                {"keyword": "Weight loss", "keyword_type": "therapeutic_area"},
+                {"keyword": "Obese", "keyword_type": "therapeutic_area"},
+                
+                # Obesity drug compounds and investigational drugs
+                {"keyword": "Retatrutide", "keyword_type": "drug_compound"},
+                {"keyword": "LY-3437943", "keyword_type": "drug_compound"},
+                {"keyword": "LY-3502970", "keyword_type": "drug_compound"},
+                {"keyword": "Orforglipron", "keyword_type": "drug_compound"},
+                {"keyword": "OWL833", "keyword_type": "drug_compound"},
+                {"keyword": "AZD5004", "keyword_type": "drug_compound"},
+                {"keyword": "Pemvidutide", "keyword_type": "drug_compound"},
+                {"keyword": "ALT-801", "keyword_type": "drug_compound"},
+                {"keyword": "AMG133", "keyword_type": "drug_compound"},
+                {"keyword": "BI456906", "keyword_type": "drug_compound"},
+                {"keyword": "AZD9550", "keyword_type": "drug_compound"},
+                {"keyword": "TG103", "keyword_type": "drug_compound"},
+                {"keyword": "GLY200", "keyword_type": "drug_compound"},
+                {"keyword": "NEX22", "keyword_type": "drug_compound"},
+                {"keyword": "Cagrisema", "keyword_type": "drug_compound"},
+                {"keyword": "Mazdutide", "keyword_type": "drug_compound"},
+                {"keyword": "LY3841136", "keyword_type": "drug_compound"},
+                {"keyword": "MBL949", "keyword_type": "drug_compound"},
+                {"keyword": "NNC0165-1875", "keyword_type": "drug_compound"},
+                {"keyword": "LY3457263", "keyword_type": "drug_compound"},
+                {"keyword": "S-309309", "keyword_type": "drug_compound"},
+                
+                # Approved obesity/diabetes drugs
+                {"keyword": "Wegovy", "keyword_type": "approved_drug"},
+                {"keyword": "Ozempic", "keyword_type": "approved_drug"},
+                {"keyword": "Rybelsus", "keyword_type": "approved_drug"},
+                {"keyword": "Mounjaro", "keyword_type": "approved_drug"},
+                {"keyword": "Trulicity", "keyword_type": "approved_drug"},
+                {"keyword": "Saxenda", "keyword_type": "approved_drug"},
+                {"keyword": "Victoza", "keyword_type": "approved_drug"},
+                {"keyword": "Exenatide", "keyword_type": "approved_drug"},
+                {"keyword": "Liraglutide", "keyword_type": "approved_drug"},
+                {"keyword": "Bydureon", "keyword_type": "approved_drug"},
+                {"keyword": "Byetta", "keyword_type": "approved_drug"},
+                
+                # Metabolic hormone mechanisms
+                {"keyword": "GLP-1", "keyword_type": "mechanism"},
+                {"keyword": "GIP", "keyword_type": "mechanism"},
+                {"keyword": "Amylin", "keyword_type": "mechanism"},
+                {"keyword": "GCG", "keyword_type": "mechanism"}
             ]
             
             for keyword_data in sample_keywords:

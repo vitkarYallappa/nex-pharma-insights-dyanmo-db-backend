@@ -90,56 +90,111 @@ class CreateGlobalBaseUrlsTableMigration(BaseMigration):
             # Sample pharmaceutical and medical data sources
             sample_base_urls = [
                 {
-                    "url": "https://pubmed.ncbi.nlm.nih.gov",
-                    "source_name": "PubMed",
-                    "source_type": "medical_literature",
-                    "country_region": "US",
-                    "url_metadata": {
-                        "description": "Biomedical literature database",
-                        "access_type": "public",
-                        "data_format": "xml"
-                    }
-                },
-                {
-                    "url": "https://clinicaltrials.gov",
-                    "source_name": "ClinicalTrials.gov",
-                    "source_type": "clinical_trials",
-                    "country_region": "US",
-                    "url_metadata": {
-                        "description": "Clinical trials registry",
-                        "access_type": "public",
-                        "data_format": "json"
-                    }
-                },
-                {
-                    "url": "https://www.fda.gov",
-                    "source_name": "FDA",
-                    "source_type": "regulatory",
-                    "country_region": "US",
-                    "url_metadata": {
-                        "description": "Food and Drug Administration",
-                        "access_type": "public",
-                        "data_format": "html"
-                    }
-                },
-                {
-                    "url": "https://www.ema.europa.eu",
-                    "source_name": "EMA",
-                    "source_type": "regulatory",
-                    "country_region": "EU",
-                    "url_metadata": {
-                        "description": "European Medicines Agency",
-                        "access_type": "public",
-                        "data_format": "html"
-                    }
-                },
-                {
-                    "url": "https://www.who.int",
-                    "source_name": "WHO",
-                    "source_type": "health_organization",
+                    "url": "https://firstwordpharma.com/",
+                    "source_name": "FirstWord Pharma",
+                    "source_type": "pharma_news",
                     "country_region": "Global",
                     "url_metadata": {
-                        "description": "World Health Organization",
+                        "description": "Pharmaceutical industry news and insights",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.bloomberg.com/",
+                    "source_name": "Bloomberg",
+                    "source_type": "financial_news",
+                    "country_region": "Global",
+                    "url_metadata": {
+                        "description": "Financial news and market data",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.fiercepharma.com/",
+                    "source_name": "FiercePharma",
+                    "source_type": "pharma_news",
+                    "country_region": "US",
+                    "url_metadata": {
+                        "description": "Pharmaceutical industry news and analysis",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.investing.com/",
+                    "source_name": "Investing.com",
+                    "source_type": "financial_news",
+                    "country_region": "Global",
+                    "url_metadata": {
+                        "description": "Financial markets and investment news",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.usatoday.com/",
+                    "source_name": "USA Today",
+                    "source_type": "general_news",
+                    "country_region": "US",
+                    "url_metadata": {
+                        "description": "General news and current events",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.washingtonpost.com/",
+                    "source_name": "The Washington Post",
+                    "source_type": "general_news",
+                    "country_region": "US",
+                    "url_metadata": {
+                        "description": "News and political coverage",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.cafepharma.com/",
+                    "source_name": "CafePharma",
+                    "source_type": "pharma_forum",
+                    "country_region": "Global",
+                    "url_metadata": {
+                        "description": "Pharmaceutical industry discussion forum",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.thepharmaletter.com/",
+                    "source_name": "The Pharma Letter",
+                    "source_type": "pharma_news",
+                    "country_region": "Global",
+                    "url_metadata": {
+                        "description": "Pharmaceutical industry news and updates",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://pharmaphorum.com/",
+                    "source_name": "Pharmaphorum",
+                    "source_type": "pharma_news",
+                    "country_region": "Global",
+                    "url_metadata": {
+                        "description": "Pharmaceutical industry insights and news",
+                        "access_type": "public",
+                        "data_format": "html"
+                    }
+                },
+                {
+                    "url": "https://www.google.com/",
+                    "source_name": "Google",
+                    "source_type": "search_engine",
+                    "country_region": "Global",
+                    "url_metadata": {
+                        "description": "Search engine and web services",
                         "access_type": "public",
                         "data_format": "html"
                     }

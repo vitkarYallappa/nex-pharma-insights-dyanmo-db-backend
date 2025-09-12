@@ -8,6 +8,7 @@ import json
 import os
 import hashlib
 import random
+from decimal import Decimal
 from typing import Dict, List, Any, Optional
 from urllib.parse import urlparse
 
@@ -16,6 +17,8 @@ from app.services.content_url_mapping_service import ContentUrlMappingService
 from app.services.content_implication_service import ContentImplicationService
 from app.services.content_insight_service import ContentInsightService
 from app.services.content_summary_service import ContentSummaryService
+from app.services.content_repository_metadata_service import ContentRepositoryMetadataService
+from app.services.content_relevance_service import ContentRelevanceService
 from app.core.logging import get_logger
 
 logger = get_logger("content_repo_dummy_service")
@@ -29,6 +32,8 @@ class ContentRepoDummyService:
         self.implication_service = ContentImplicationService()
         self.insight_service = ContentInsightService()
         self.summary_service = ContentSummaryService()
+        self.metadata_service = ContentRepositoryMetadataService()
+        self.relevance_service = ContentRelevanceService()
         
         # Define the JSON file paths
         self.json_sets = [
@@ -235,6 +240,81 @@ class ContentRepoDummyService:
             logger.error(f"Error creating summary: {str(e)}")
             raise
     
+    async def create_metadata_entries(self, content_id: str, request_id: str, project_id: str, 
+                                    item_data: Dict[str, Any]) -> List[str]:
+        """Create content repository metadata entries and return list of metadata_ids"""
+        metadata_ids = []
+        
+        try:
+            # Create single metadata entry as specified
+            metadata = await self.metadata_service.create_metadata(
+                content_id=content_id,
+                request_id=request_id,
+                project_id=project_id,
+                metadata_type=item_data.get('source_category', 'web_article'),
+                metadata_key='Non_relevant',
+                metadata_value=item_data.get('publish_date', '2024-01-01'),
+                data_type='string',
+                is_searchable=True
+            )
+            
+            metadata_ids.append(metadata.pk)
+            logger.info(f"Created metadata entry: {metadata.pk} (Non_relevant)")
+            
+            return metadata_ids
+            
+        except Exception as e:
+            logger.error(f"Error creating metadata entries: {str(e)}")
+            raise
+    
+    async def create_relevance_entry(self, url_id: str, content_id: str, 
+                                   item_data: Dict[str, Any]) -> str:
+        """Create content relevance entry and return relevance_id"""
+        try:
+            # Generate relevance text based on item data
+            relevance_factors = []
+            
+            if 'insights' in item_data and item_data['insights']:
+                relevance_factors.append("Contains valuable insights")
+            
+            if 'implications' in item_data and item_data['implications']:
+                relevance_factors.append("Has business implications")
+                
+            if 'summary' in item_data and item_data['summary']:
+                relevance_factors.append("Comprehensive summary available")
+            
+            relevance_text = "Content relevance determined by: " + "; ".join(relevance_factors)
+            
+            # Generate realistic scores
+            relevance_score = Decimal(random.uniform(0.75, 0.95))  # High relevance for dummy data
+            confidence_score = Decimal(random.uniform(0.8, 1.0))   # High confidence
+            is_relevant = relevance_score > Decimal(0.7)
+            
+            # Create file path for relevance content
+            file_path = f"relevance/{content_id}/relevance_analysis.txt"
+            
+            relevance = await self.relevance_service.create_relevance(
+                url_id=url_id,
+                content_id=content_id,
+                relevance_text=relevance_text,
+                relevance_score=relevance_score,
+                is_relevant=is_relevant,
+                relevance_category="high_value",
+                confidence_score=confidence_score,
+                relevance_content_file_path=file_path,
+                version=1,
+                is_canonical=True,
+                preferred_choice=True,
+                created_by="dummy_data_service"
+            )
+            
+            logger.info(f"Created relevance entry: {relevance.pk} (score: {relevance_score})")
+            return relevance.pk
+            
+        except Exception as e:
+            logger.error(f"Error creating relevance entry: {str(e)}")
+            raise
+    
     async def generate_dummy_content(self, project_id: str, request_id: str) -> Dict[str, Any]:
         """
         Main method to generate dummy content for a project request
@@ -254,6 +334,8 @@ class ContentRepoDummyService:
                 "total_insights": 0,
                 "total_implications": 0,
                 "total_summaries": 0,
+                "total_metadata": 0,
+                "total_relevance": 0,
                 "errors": []
             }
             
@@ -285,6 +367,14 @@ class ContentRepoDummyService:
                         summary_id = await self.create_summary(url_id, content_id, item['summary'])
                         results["total_summaries"] += 1
                     
+                    # 6. Create metadata entries
+                    metadata_ids = await self.create_metadata_entries(content_id, request_id, project_id, item)
+                    results["total_metadata"] += len(metadata_ids)
+                    
+                    # 7. Create relevance entry
+                    relevance_id = await self.create_relevance_entry(url_id, content_id, item)
+                    results["total_relevance"] += 1
+                    
                     # Track successful entry
                     results["content_entries"].append({
                         "item_id": item.get('id'),
@@ -292,7 +382,9 @@ class ContentRepoDummyService:
                         "url_id": url_id,
                         "insights_count": len(insight_ids),
                         "implications_count": len(implication_ids),
-                        "has_summary": summary_id is not None
+                        "has_summary": summary_id is not None,
+                        "metadata_count": len(metadata_ids),
+                        "has_relevance": relevance_id is not None
                     })
                     
                     results["items_processed"] += 1
@@ -305,7 +397,7 @@ class ContentRepoDummyService:
                     continue
             
             logger.info(f"Dummy content generation completed. Processed {results['items_processed']} items")
-            logger.info(f"Created {results['total_insights']} insights, {results['total_implications']} implications, {results['total_summaries']} summaries")
+            logger.info(f"Created {results['total_insights']} insights, {results['total_implications']} implications, {results['total_summaries']} summaries, {results['total_metadata']} metadata entries, {results['total_relevance']} relevance entries")
             
             return results
             

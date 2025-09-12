@@ -31,7 +31,8 @@ class ContentRepositoryController:
             if project_id:
                 query_filters['project_id'] = project_id.strip()
             if request_id:
-                query_filters['request_id'] = request_id.strip()
+                pass
+                # query_filters['request_id'] = request_id.strip()
 
             # Get content entries from service
             content_entries = await self.content_repository_service.get_all_by_query(
