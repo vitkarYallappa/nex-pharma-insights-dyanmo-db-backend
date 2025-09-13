@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     
     # DynamoDB Mode Configuration
     USE_LOCAL_DYNAMODB: bool = False  # True for local DynamoDB, False for AWS DynamoDB
+    FORCE_AWS_DYNAMODB: bool = False  # True to force AWS even with dummy credentials
     
     # AWS DynamoDB Configuration
     AWS_ACCESS_KEY_ID: Optional[str] = "dummy"  # Default for local development
@@ -56,6 +57,9 @@ class Settings(BaseSettings):
     @property
     def should_use_aws_dynamodb(self) -> bool:
         """Determine if AWS DynamoDB should be used based on credentials and configuration"""
+        # If forced AWS mode, always use AWS regardless of credentials
+        if self.FORCE_AWS_DYNAMODB:
+            return True
         # If real AWS credentials are provided, always use AWS DynamoDB
         if self.has_real_aws_credentials:
             return True

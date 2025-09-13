@@ -50,18 +50,10 @@ class DynamoDBClient:
                     self._test_connection()
                     logger.info("AWS DynamoDB connection successful")
                 except Exception as aws_error:
-                    logger.warning(f"AWS DynamoDB connection failed: {str(aws_error)}")
-                    logger.info("Falling back to local DynamoDB")
-                    # Fall back to local DynamoDB
-                    self.dynamodb = boto3.resource(
-                        'dynamodb',
-                        endpoint_url=settings.DYNAMODB_ENDPOINT,
-                        region_name=settings.AWS_REGION,
-                        aws_access_key_id='local',
-                        aws_secret_access_key='local'
-                    )
-                    # Test local connection
-                    self._test_connection()
+                    logger.error(f"AWS DynamoDB connection failed: {str(aws_error)}")
+                    logger.error("AWS connection required - not falling back to local")
+                    # Re-raise the exception to fail fast instead of falling back
+                    raise Exception(f"AWS DynamoDB connection failed: {str(aws_error)}")
             else:
                 logger.info(f"Connecting to local DynamoDB at {settings.dynamodb_endpoint}")
                 logger.info("Using dummy credentials for local development")
