@@ -21,6 +21,7 @@ from app.models.source_urls_model import SourceUrlsModel
 from app.models.project_request_statistics_model import ProjectRequestStatisticsModel
 from app.models.project_modules_statistics_model import ProjectModulesStatisticsModel
 from app.use_cases.content_repo_dummy_service import ContentRepoDummyService
+from app.use_cases.summary_generation_api_client import SummaryGenerationAPIClient
 from app.core.logging import get_logger
 from app.core.exceptions import ValidationException
 
@@ -36,7 +37,7 @@ class ProjectRequestCreationOrchestrator:
     Handles the sequence: Project → Request → Keywords → Source URLs
     """
     
-    def __init__(self):
+    def __init__(self, use_dummy_data: bool = True):
         self.project_service = ProjectService()
         self.project_request_statistics_service =  ProjectRequestStatisticsService()
         self.project_modules_statistics_service = ProjectModulesStatisticsService()
@@ -44,13 +45,15 @@ class ProjectRequestCreationOrchestrator:
         self.keywords_service = KeywordsService()
         self.source_urls_service = SourceUrlsService()
         self.content_dummy_service = ContentRepoDummyService()
+        self.summary_api_client = SummaryGenerationAPIClient()
+        self.use_dummy_data = use_dummy_data
         self.logger = logger
     
     async def create_complete_project_request(
         self,
         project_data: Dict[str, Any],
         request_data: Dict[str, Any],
-        keywords: List[str],
+        keywords_values: List[str],
         base_urls: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """
@@ -59,7 +62,7 @@ class ProjectRequestCreationOrchestrator:
         Args:
             project_data: Project information (name, description, etc.)
             request_data: Request information (title, description, time_range, etc.)
-            keywords: List of keyword strings
+            keywords_values: List of keyword strings
             base_urls: List of base URL dictionaries with source_type, source_name, url
             
         Returns:
@@ -98,8 +101,8 @@ class ProjectRequestCreationOrchestrator:
             self.logger.info(f"[{orchestration_id}] Request created successfully: {request.pk}")
             
             # Step 3: Create Keywords (one by one)
-            self.logger.info(f"[{orchestration_id}] Step 3: Creating {len(keywords)} keywords")
-            created_keywords = await self._create_keywords(keywords, request.pk, orchestration_id)
+            self.logger.info(f"[{orchestration_id}] Step 3: Creating {len(keywords_values)} keywords")
+            created_keywords = await self._create_keywords(keywords_values, request.pk, orchestration_id)
             created_entities["keywords"] = [kw.to_response() for kw in created_keywords]
             self.logger.info(f"[{orchestration_id}] Keywords created successfully: {len(created_keywords)} items")
             
@@ -124,7 +127,35 @@ class ProjectRequestCreationOrchestrator:
             # Step 7: Generate Dummy Content Data
             self.logger.info(f"[{orchestration_id}] Step 7: Generating dummy content data")
             try:
-               pass
+                if self.use_dummy_data:
+                    # Use dummy content generation
+                    content_results = await self.content_dummy_service.generate_dummy_content(
+                        project_id=project.pk,
+                        request_id=request.pk
+                    )
+                    self.logger.info(
+                        f"[{orchestration_id}] Dummy content generated successfully - "
+                        f"Items: {content_results['items_processed']}, "
+                        f"Insights: {content_results['total_insights']}, "
+                        f"Implications: {content_results['total_implications']}, "
+                        f"Summaries: {content_results['total_summaries']}"
+                    )
+                else:
+                    # Use actual API call for summary generation
+                    content_results = await self._generate_summary_via_api(
+                        project=project,
+                        request=request,
+                        keywords=keywords_values,
+                        source_urls=base_urls,
+                        orchestration_id=orchestration_id
+                    )
+                    self.logger.info(
+                        f"[{orchestration_id}] Summary API call completed successfully"
+                    )
+
+                created_entities["content_generation"] = content_results
+
+                
             except Exception as content_error:
                 self.logger.warning(f"[{orchestration_id}] Dummy content generation failed: {str(content_error)}")
                 # Don't fail the entire process if dummy content generation fails
@@ -326,24 +357,13 @@ class ProjectRequestCreationOrchestrator:
                 raise ValidationException("Title is required")
             if not payload.get("created_by"):
                 raise ValidationException("Creator ID is required")
-            
-            # Execute orchestration
-            if project_id:
-                # Use existing project
-                return await self.create_request_for_existing_project(
-                    project_id=project_id,
-                    request_data=request_data,
-                    keywords=keywords,
-                    base_urls=base_urls
-                )
-            else:
-                # Create new project and request
-                return await self.create_complete_project_request(
-                    project_data=project_data,
-                    request_data=request_data,
-                    keywords=keywords,
-                    base_urls=base_urls
-                )
+
+            return await self.create_complete_project_request(
+                project_data=project_data,
+                request_data=request_data,
+                keywords_values=keywords,
+                base_urls=base_urls
+            )
             
         except Exception as e:
             self.logger.error(f"Failed to process payload: {str(e)}")
@@ -422,7 +442,41 @@ class ProjectRequestCreationOrchestrator:
             modules_stats = await self._create_or_update_project_modules_statistics(project.pk, orchestration_id)
             created_entities["project_modules_statistics"] = modules_stats.to_response()
             self.logger.info(f"[{orchestration_id}] Project modules statistics handled: {modules_stats.pk}")
-            
+
+            # Step 7: Generate Content Data (Dummy or Real API Call)
+            self.logger.info(f"[{orchestration_id}] Step 7: Generating content data (dummy: {self.use_dummy_data})")
+            try:
+                if self.use_dummy_data:
+                    # Use dummy content generation
+                    content_results = await self.content_dummy_service.generate_dummy_content(
+                        project_id=project.pk,
+                        request_id=request.pk
+                    )
+                    self.logger.info(
+                        f"[{orchestration_id}] Dummy content generated successfully - "
+                        f"Items: {content_results['items_processed']}, "
+                        f"Insights: {content_results['total_insights']}, "
+                        f"Implications: {content_results['total_implications']}, "
+                        f"Summaries: {content_results['total_summaries']}"
+                    )
+                else:
+                    # Use actual API call for summary generation
+                    pass
+                
+                created_entities["content_generation"] = {}
+                
+            except Exception as content_error:
+                self.logger.warning(f"[{orchestration_id}] Content generation failed: {str(content_error)}")
+                # Don't fail the entire process if content generation fails
+                created_entities["content_generation"] = {
+                    "error": str(content_error),
+                    "items_processed": 0,
+                    "total_insights": 0,
+                    "total_implications": 0,
+                    "total_summaries": 0
+                }
+
+
             # Success summary
             self.logger.info(
                 f"[{orchestration_id}] Request creation for existing project completed successfully - "
@@ -555,3 +609,98 @@ class ProjectRequestCreationOrchestrator:
         except Exception as e:
             self.logger.error(f"[{orchestration_id}] Project modules statistics handling failed: {str(e)}")
             raise
+    
+    async def _generate_summary_via_api(
+        self, 
+        project: ProjectModel, 
+        request: RequestsModel, 
+        keyword_list: List[str],
+        source_urls: List[SourceUrlsModel],
+        orchestration_id: str
+    ) -> Dict[str, Any]:
+        """
+        Generate summary using the actual API call instead of dummy data.
+        
+        Args:
+            project: The project model
+            request: The request model
+            keywords: List of keyword models
+            source_urls: List of source URL models
+            orchestration_id: Orchestration ID for logging
+            
+        Returns:
+            Dict containing the API response and processing results
+        """
+        try:
+            self.logger.info(f"[{orchestration_id}] Preparing API call for summary generation")
+            
+
+            # Transform source URLs to the expected format
+            base_urls = []
+            for source_url in source_urls:
+                url_info = {
+                    "url": source_url.url,
+                    "name": source_url.source_name if hasattr(source_url, 'source_name') and source_url.source_name else None,
+                    "type": source_url.source_type if hasattr(source_url, 'source_type') and source_url.source_type else "medical_literature"
+                }
+                base_urls.append(url_info)
+            
+            # Prepare date configuration if needed (can be extended based on requirements)
+            date_config = None  # This can be configured based on project requirements
+            
+            self.logger.debug(
+                f"[{orchestration_id}] API call parameters - "
+                f"Project: {project.pk}, Request: {request.pk}, "
+                f"Keywords: {len(keyword_list)}, URLs: {len(base_urls)}"
+            )
+            
+            # Make the API call
+            api_response = self.summary_api_client.generate_summary(
+                project_id=project.pk,
+                request_id=request.pk,
+                keywords=keyword_list,
+                base_urls=base_urls,
+                date_config=date_config
+            )
+            
+            self.logger.info(f"[{orchestration_id}] Summary API call successful")
+            
+            # Transform API response to match the expected format
+            # This structure should match what the dummy service returns
+            result = {
+                "api_response": api_response,
+                "items_processed": len(base_urls),  # Number of URLs processed
+                "total_insights": 0,  # Will be updated based on actual API response
+                "total_implications": 0,  # Will be updated based on actual API response
+                "total_summaries": 1,  # Assuming one summary is generated
+                "processing_mode": "api_call",
+                "project_id": project.pk,
+                "request_id": request.pk,
+                "keywords_count": len(keyword_list),
+                "urls_count": len(base_urls)
+            }
+            
+            # Extract counts from API response if available
+            if isinstance(api_response, dict):
+                if "insights_count" in api_response:
+                    result["total_insights"] = api_response["insights_count"]
+                if "implications_count" in api_response:
+                    result["total_implications"] = api_response["implications_count"]
+                if "summaries_count" in api_response:
+                    result["total_summaries"] = api_response["summaries_count"]
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"[{orchestration_id}] Summary API call failed: {str(e)}")
+            # Return error structure that matches the expected format
+            return {
+                "error": str(e),
+                "items_processed": 0,
+                "total_insights": 0,
+                "total_implications": 0,
+                "total_summaries": 0,
+                "processing_mode": "api_call_failed",
+                "project_id": project.pk,
+                "request_id": request.pk
+            }

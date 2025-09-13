@@ -162,8 +162,12 @@ class ContentInsightService:
             self.logger.error(f"Update content insight entry failed: {str(e)}")
             raise
     
-    async def get_all_by_query(self, query_filters: Optional[Dict[str, Any]] = None, limit: Optional[int] = None) -> List[ContentInsightModel]:
-        """Get all content insight entries by query filters"""
+    async def get_all_by_query(self, query_filters: Optional[Dict[str, Any]] = None, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Get all content insight entries by query filters
+        
+        Returns:
+            List[Dict[str, Any]]: All returned dictionaries will have 'status' field set to 'saved' by default
+        """
         try:
             # Validate limit if provided
             if limit is not None and limit <= 0:
@@ -172,16 +176,21 @@ class ContentInsightService:
             # Get entries from repository
             entries = await self.insight_repository.find_all_by_query(query=query_filters, limit=limit)
             
-            # Convert to model objects - check if entries are already model objects or dicts
-            insight_models = []
+            # Convert to dictionaries with status field - check if entries are already model objects or dicts
+            insight_dicts = []
             for entry in entries:
                 if isinstance(entry, ContentInsightModel):
-                    insight_models.append(entry)
+                    # Convert model to dict and ensure status field is present
+                    entry_dict = entry.to_dict()
+                    entry_dict['status'] = 'saved'
+                    insight_dicts.append(entry_dict)
                 else:
-                    insight_models.append(ContentInsightModel.from_dict(entry))
+                    # Always ensure status field is present with default value
+                    entry['status'] = 'saved'
+                    insight_dicts.append(entry)
             
-            self.logger.info(f"Retrieved {len(insight_models)} content insight entries with filters: {query_filters}")
-            return insight_models
+            self.logger.info(f"Retrieved {len(insight_dicts)} content insight entries with filters: {query_filters}")
+            return insight_dicts
             
         except ValidationException:
             raise

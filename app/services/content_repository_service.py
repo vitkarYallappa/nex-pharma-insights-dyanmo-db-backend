@@ -201,25 +201,37 @@ class ContentRepositoryService:
             # Start with all existing content model fields
             content_dict = content_model.to_dict()
             
-            # Check if metadata exists for this content
-            existing_metadata = await self.metadata_service.get_metadata_by_content_id(content_model.pk, limit=1)
+            # Get all metadata for this content in a single call
+            all_metadata = await self.metadata_service.get_metadata_by_content_id(content_model.pk)
             
-            # Add publish_date (one day minus - yesterday)
+            # Initialize default values
             yesterday = datetime.utcnow() - timedelta(days=1)
-            if existing_metadata:
-                # Use existing metadata value if available
-                content_dict['publish_date'] = existing_metadata[0].metadata_value
-            else:
-                # Use yesterday's timestamp as dummy publish date
-                content_dict['publish_date'] = yesterday.isoformat()
+            content_dict['publish_date'] = yesterday.isoformat()
+            content_dict['source_category'] = "N/A"
             
-            # Add source_type - use existing or dummy if not found
+            # Set source_type from content model first, then override from metadata if available
             if hasattr(content_model, 'source_type') and content_model.source_type:
                 content_dict['source_type'] = content_model.source_type
             else:
-                # Add dummy source type when not found
                 content_dict['source_type'] = 'dummy_source'
             
+            # Parse metadata to extract the values we need
+            for metadata in all_metadata:
+                # Check for publish date
+                if (metadata.metadata_key in ['publish_date', 'date'] or 
+                    metadata.metadata_type in ['metadata_value', 'date']):
+                    content_dict['publish_date'] = metadata.metadata_value
+                
+                # Check for source category
+                elif (metadata.metadata_key in ['source_category', 'category'] or 
+                      metadata.metadata_type in ['metadata_type', 'category']):
+                    content_dict['source_category'] = metadata.metadata_value
+                
+                # Check for source type
+                elif (metadata.metadata_key in ['source_type', 'type'] or 
+                      metadata.metadata_type in ['source_type', 'type']):
+                    content_dict['source_type'] = metadata.metadata_value
+
             # Check relevance and add relevance_check
             existing_relevance = await self.relevance_service.get_relevance_by_content_id(content_model.pk)
             if existing_relevance:
@@ -238,6 +250,7 @@ class ContentRepositoryService:
                 content_dict = content_model.to_dict()
                 yesterday = datetime.utcnow() - timedelta(days=1)
                 content_dict['publish_date'] = yesterday.isoformat()
+                content_dict['source_category'] = "N/A"
                 content_dict['source_type'] = 'dummy_source'
                 content_dict['relevance_check'] = True
                 return content_dict
@@ -247,6 +260,7 @@ class ContentRepositoryService:
                 return {
                     'pk': getattr(content_model, 'pk', 'unknown'),
                     'publish_date': '2025-09-11T00:00:00',
+                    'source_category': "N/A",
                     'source_type': 'dummy_source',
                     'relevance_check': True
                 } 

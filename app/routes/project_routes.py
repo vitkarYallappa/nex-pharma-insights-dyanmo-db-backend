@@ -36,6 +36,7 @@ class CreateProjectRequest(BaseModel):
 
 class BaseUrlRequest(BaseModel):
     """Request model for base URL"""
+    id: Optional[str] = Field(None, description="Optional URL ID")
     source_type: str = Field(..., description="Source type (e.g., government, academic, clinical)")
     source_name: str = Field(..., description="Source name (e.g., FDA, NIH)")
     url: str = Field(..., description="Base URL")
@@ -49,6 +50,12 @@ class TimeRangeRequest(BaseModel):
     end: str = Field(..., description="End date (YYYY-MM-DD)")
     date_range: Optional[str] = Field(None, description="Human readable date range")
 
+class SubModulesRequest(BaseModel):
+    """Request model for sub-modules configuration"""
+    insights: Optional[bool] = Field(True, description="Enable insights module")
+    implications: Optional[bool] = Field(True, description="Enable implications module")
+    relevancyCheck: Optional[bool] = Field(True, description="Enable relevancy check module")
+
 class CreateProjectRequestWithDetails(BaseModel):
     """Request model for creating a complete project request with all related entities"""
     project_id: Optional[str] = Field(None, description="Optional existing project ID")
@@ -59,6 +66,8 @@ class CreateProjectRequestWithDetails(BaseModel):
     created_by: str = Field(..., description="Creator user ID (UUID as string)")
     keywords: List[str] = Field(default=[], description="List of keywords for the request")
     base_urls: List[BaseUrlRequest] = Field(default=[], description="List of base URLs for monitoring")
+    kits_kiqs: Optional[str] = Field(None, description="Key Intelligence Topics (KITs) and Key Intelligence Questions (KIQs)")
+    sub_modules: Optional[SubModulesRequest] = Field(None, description="Sub-modules configuration")
 
 # Project CRUD Operations
 # @router.post("/",
@@ -240,7 +249,9 @@ async def create_project_request_with_details(
         "priority": request_data.priority,
         "created_by": request_data.created_by,
         "keywords": request_data.keywords,
-        "base_urls": [url.model_dump() for url in request_data.base_urls]
+        "base_urls": [url.model_dump() for url in request_data.base_urls],
+        "kits_kiqs": request_data.kits_kiqs,
+        "sub_modules": request_data.sub_modules.model_dump() if request_data.sub_modules else {}
     }
     
     # Call controller method (proper layered architecture)

@@ -35,6 +35,13 @@ class RegenerateInsightRequest(BaseModel):
     question_text: Optional[str] = Field(None, description="Optional question for QA generation", max_length=1000)
 
 
+class SaveRegenerateInsightRequest(BaseModel):
+    """Request model for saving a regenerated insight"""
+    content_id: str = Field(..., description="Content ID (UUID as string)", min_length=1)
+    generated_id: str = Field(..., description="Insight ID (UUID as string)", min_length=1)
+    status: str = Field(default="draft", description="Status of the insight (draft, published, etc.)", max_length=50)
+
+
 @router.get("/", response_model=APIResponse, status_code=status.HTTP_200_OK)
 async def get_content_insight_entries(
         request: Request,
@@ -100,4 +107,36 @@ async def regenerate_insight(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=safe_response_detail("Failed to regenerate insight", str(e))
+        )
+
+@router.post("/save-regenerate", response_model=APIResponse, status_code=status.HTTP_200_OK)
+async def save_regenerate_insight(
+    request: Request,
+    save_request: SaveRegenerateInsightRequest
+):
+    """
+    Save regenerated insight by fetching QA details and adding to insights table
+    
+    - **content_id**: The content ID to save regenerated insight for (UUID)
+    - **insight_id**: The insight ID to fetch QA details for (UUID)
+    - **insight_status**: The status of the insight (default: draft)
+    """
+    try:
+        controller = get_content_insight_controller()
+        api_request_id = get_request_id(request)
+        
+        response = await controller.save_regenerate_insight(
+            content_id=save_request.content_id,
+            insight_id=save_request.generated_id,
+            insight_status=save_request.status,
+            api_request_id=api_request_id
+        )
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Save regenerated insight endpoint failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=safe_response_detail("Failed to save regenerated insight", str(e))
         )

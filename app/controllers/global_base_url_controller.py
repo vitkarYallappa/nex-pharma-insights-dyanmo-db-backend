@@ -120,7 +120,14 @@ class GlobalBaseUrlController:
                 limit=limit
             )
 
-            urls_data = [url.to_response() for url in global_base_urls]
+            urls_data = [
+                {
+                    "url": url.url,
+                    "source_name": url.source_name,
+                    "source_type": url.source_type
+                }
+                for url in global_base_urls
+            ]
 
             # Build filter description for message
             filters = []

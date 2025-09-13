@@ -39,7 +39,7 @@ class ContentRepositoryController:
             # Get content entries from service
             content_entries = await self.content_repository_service.get_all_by_query(
                 query_filters=query_filters,
-                limit=limit
+                limit=1000
             )
 
             # Convert to response format

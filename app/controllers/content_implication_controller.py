@@ -34,7 +34,7 @@ class ContentImplicationController:
             # Get implication entries from service
             implication_entries = await self.content_implication_service.get_all_by_query(
                 query_filters=query_filters,
-                limit=10
+                limit=50
             )
 
             # Convert to response format

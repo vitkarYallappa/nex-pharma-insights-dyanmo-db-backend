@@ -33,7 +33,7 @@ class ContentInsightController:
             # Get insight entries from service
             insight_entries = await self.content_insight_service.get_all_by_query(
                 query_filters=query_filters,
-                limit=limit
+                limit=50
             )
 
             # Convert to response format
@@ -73,9 +73,6 @@ class ContentInsightController:
         try:
             result = await self.insights_regenerate_service.regenerate_insight(
                 content_id=content_id,
-                metadata_field1=metadata_field1,
-                metadata_field2=metadata_field2,
-                metadata_field3=metadata_field3,
                 question_text=question_text
             )
 
@@ -98,6 +95,49 @@ class ContentInsightController:
             self.logger.error(f"Insight regeneration failed: {str(e)}")
             return ResponseFormatter.error(
                 message="Failed to regenerate insight",
+                errors=[{"error": str(e)}],
+                request_id=api_request_id
+            )
+
+    async def save_regenerate_insight(self, content_id: str, insight_id: str,
+                                      insight_status: str = "draft", api_request_id: Optional[str] = None) -> APIResponse:
+        """Save regenerated insight by fetching QA details and adding to insights table"""
+        try:
+            result = None
+            
+            if insight_status == "draft":
+                result = await self.insights_regenerate_service.save_regenerate_insight(
+                    content_id=content_id,
+                    insight_id=insight_id
+                )
+            else:
+                # Handle other insight statuses - for now, return an error for unsupported status
+                self.logger.warning(f"Unsupported insight status: {insight_status}")
+                return ResponseFormatter.error(
+                    message=f"Unsupported insight status: {insight_status}",
+                    errors=[{"field": "insight_status", "message": f"Status '{insight_status}' is not supported yet"}],
+                    request_id=api_request_id
+                )
+
+            self.logger.info(f"Regenerated insight saved successfully for content: {content_id}, insight: {insight_id}")
+            return ResponseFormatter.success(
+                data=result,
+                message="Regenerated insight saved successfully",
+                request_id=api_request_id
+            )
+
+        except ValidationException as e:
+            self.logger.error(f"Save regenerated insight validation failed: {str(e)}")
+            return ResponseFormatter.error(
+                message=str(e),
+                errors=[{"field": "validation", "message": str(e)}],
+                request_id=api_request_id
+            )
+
+        except Exception as e:
+            self.logger.error(f"Save regenerated insight failed: {str(e)}")
+            return ResponseFormatter.error(
+                message="Failed to save regenerated insight",
                 errors=[{"error": str(e)}],
                 request_id=api_request_id
             )
