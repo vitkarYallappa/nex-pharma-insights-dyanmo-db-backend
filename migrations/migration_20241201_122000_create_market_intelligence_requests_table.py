@@ -34,7 +34,7 @@ class CreateMarketIntelligenceRequestsTableMigration(BaseMigration):
         try:
             # Get table schema from configuration
             table_schema = MarketIntelligenceRequestsTableConfig.SCHEMA
-            table_name = MarketIntelligenceRequestsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = MarketIntelligenceRequestsTableConfig.get_table_name()
             
             # Create the table
             table_created = dynamodb_client.create_table(
@@ -62,7 +62,7 @@ class CreateMarketIntelligenceRequestsTableMigration(BaseMigration):
         
         try:
             # Delete the table
-            table_name = MarketIntelligenceRequestsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = MarketIntelligenceRequestsTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:
@@ -85,7 +85,7 @@ class CreateMarketIntelligenceRequestsTableMigration(BaseMigration):
             from datetime import datetime
             import uuid
             
-            table_name = MarketIntelligenceRequestsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = MarketIntelligenceRequestsTableConfig.get_table_name()
             table = dynamodb_client.get_table(table_name)
             
             # Create a sample request

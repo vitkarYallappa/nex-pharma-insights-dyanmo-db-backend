@@ -53,7 +53,7 @@ class ContentRepositoryModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ContentRepositoryTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ContentRepositoryTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, request_id: str, project_id: str, canonical_url: str, title: str,

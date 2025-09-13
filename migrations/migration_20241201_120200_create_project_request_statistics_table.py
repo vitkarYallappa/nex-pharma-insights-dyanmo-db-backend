@@ -34,7 +34,7 @@ class CreateProjectRequestStatisticsTableMigration(BaseMigration):
         try:
             # Get project request statistics table schema from configuration
             statistics_schema = ProjectRequestStatisticsTableConfig.SCHEMA
-            table_name = ProjectRequestStatisticsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ProjectRequestStatisticsTableConfig.get_table_name()
             
             # Create the project_request_statistics table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -62,7 +62,7 @@ class CreateProjectRequestStatisticsTableMigration(BaseMigration):
         
         try:
             # Delete the project_request_statistics table
-            table_name = ProjectRequestStatisticsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ProjectRequestStatisticsTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

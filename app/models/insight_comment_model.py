@@ -35,7 +35,7 @@ class InsightCommentModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return InsightCommentTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return InsightCommentTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, insight_id: str, comment_text: str, comment_type: Optional[str] = None) -> 'InsightCommentModel':

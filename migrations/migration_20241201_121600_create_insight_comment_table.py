@@ -34,7 +34,7 @@ class CreateInsightCommentTableMigration(BaseMigration):
         try:
             # Get insight comment table schema from configuration
             comment_schema = InsightCommentTableConfig.SCHEMA
-            table_name = InsightCommentTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = InsightCommentTableConfig.get_table_name()
             
             # Create the insight_comment table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -63,7 +63,7 @@ class CreateInsightCommentTableMigration(BaseMigration):
         
         try:
             # Delete the insight_comment table
-            table_name = InsightCommentTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = InsightCommentTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

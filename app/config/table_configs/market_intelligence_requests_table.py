@@ -11,16 +11,8 @@ class MarketIntelligenceRequestsTableConfig:
     
     @classmethod
     def get_table_name(cls, environment: str = None) -> str:
-        """Get environment-specific table name"""
-        env = environment or settings.TABLE_ENVIRONMENT
-        if env == "production":
-            return f"prod-{cls.BASE_TABLE_NAME}"
-        elif env == "staging":
-            return f"staging-{cls.BASE_TABLE_NAME}"
-        elif env == "development":
-            return f"dev-{cls.BASE_TABLE_NAME}"
-        else:
-            return cls.BASE_TABLE_NAME
+        """Get table name without environment suffix"""
+        return cls.BASE_TABLE_NAME
     
     SCHEMA = {
         "key_schema": [

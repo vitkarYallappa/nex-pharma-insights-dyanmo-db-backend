@@ -44,7 +44,7 @@ class GlobalBaseUrlsModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return GlobalBaseUrlsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return GlobalBaseUrlsTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, url: str, source_name: Optional[str] = None, source_type: Optional[str] = None,

@@ -34,7 +34,7 @@ class CreateProjectsTableMigration(BaseMigration):
         try:
             # Get projects table schema from configuration
             projects_schema = ProjectsTableConfig.SCHEMA
-            table_name = ProjectsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ProjectsTableConfig.get_table_name()
             
             # Create the projects_details table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -62,7 +62,7 @@ class CreateProjectsTableMigration(BaseMigration):
         
         try:
             # Delete the projects_details table
-            table_name = ProjectsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ProjectsTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

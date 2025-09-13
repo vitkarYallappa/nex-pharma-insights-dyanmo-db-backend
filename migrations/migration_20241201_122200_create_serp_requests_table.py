@@ -35,7 +35,7 @@ class CreateSerpRequestsTableMigration(BaseMigration):
         try:
             # Get serp_requests table schema from configuration
             serp_requests_schema = SerpRequestsTableConfig.SCHEMA
-            table_name = SerpRequestsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = SerpRequestsTableConfig.get_table_name()
             
             # Create the serp_requests table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -60,7 +60,7 @@ class CreateSerpRequestsTableMigration(BaseMigration):
         
         try:
             # Delete the serp_requests table
-            table_name = SerpRequestsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = SerpRequestsTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

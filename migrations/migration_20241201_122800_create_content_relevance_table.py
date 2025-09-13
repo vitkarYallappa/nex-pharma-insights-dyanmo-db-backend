@@ -34,7 +34,7 @@ class CreateContentRelevanceTableMigration(BaseMigration):
         try:
             # Get content relevance table schema from configuration
             relevance_schema = ContentRelevanceTableConfig.SCHEMA
-            table_name = ContentRelevanceTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentRelevanceTableConfig.get_table_name()
             
             # Create the content_relevance table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -62,7 +62,7 @@ class CreateContentRelevanceTableMigration(BaseMigration):
         
         try:
             # Delete the content_relevance table
-            table_name = ContentRelevanceTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentRelevanceTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

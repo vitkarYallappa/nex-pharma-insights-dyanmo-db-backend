@@ -34,7 +34,7 @@ class CreateInsightQaTableMigration(BaseMigration):
         try:
             # Get insight qa table schema from configuration
             qa_schema = InsightQaTableConfig.SCHEMA
-            table_name = InsightQaTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = InsightQaTableConfig.get_table_name()
             
             # Create the insight_qa table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -63,7 +63,7 @@ class CreateInsightQaTableMigration(BaseMigration):
         
         try:
             # Delete the insight_qa table
-            table_name = InsightQaTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = InsightQaTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

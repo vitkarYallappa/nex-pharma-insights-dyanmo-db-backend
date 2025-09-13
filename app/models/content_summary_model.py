@@ -51,7 +51,7 @@ class ContentSummaryModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ContentSummaryTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ContentSummaryTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, url_id: str, content_id: str, summary_text: str, summary_content_file_path: str,

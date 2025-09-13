@@ -34,7 +34,7 @@ class CreateImplicationQaTableMigration(BaseMigration):
         try:
             # Get implication qa table schema from configuration
             qa_schema = ImplicationQaTableConfig.SCHEMA
-            table_name = ImplicationQaTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ImplicationQaTableConfig.get_table_name()
             
             # Create the implication_qa table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -63,7 +63,7 @@ class CreateImplicationQaTableMigration(BaseMigration):
         
         try:
             # Delete the implication_qa table
-            table_name = ImplicationQaTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ImplicationQaTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

@@ -100,8 +100,7 @@ class SeederController:
                         "seeders_run": successful_seeders,
                         "total_seeders": len(sorted_seeders),
                         "status": "completed",
-                        "results": results,
-                        "environment": settings.TABLE_ENVIRONMENT
+                        "results": results
                     }
                 )
             else:
@@ -111,8 +110,7 @@ class SeederController:
                         "seeders_run": successful_seeders,
                         "total_seeders": len(sorted_seeders),
                         "status": "partial",
-                        "results": results,
-                        "environment": settings.TABLE_ENVIRONMENT
+                        "results": results
                     },
                     status_code=status.HTTP_207_MULTI_STATUS
                 )
@@ -204,8 +202,7 @@ class SeederController:
                     "seeders_cleared": successful_clears,
                     "total_seeders": len(sorted_seeders),
                     "status": "completed" if successful_clears == len(sorted_seeders) else "partial",
-                    "results": results,
-                    "environment": settings.TABLE_ENVIRONMENT
+                    "results": results
                 }
             )
                 
@@ -253,8 +250,7 @@ class SeederController:
                 message=f"Found {len(seeders_info)} seeders",
                 data={
                     "total_seeders": len(seeders_info),
-                    "seeders": seeders_info,
-                    "environment": settings.TABLE_ENVIRONMENT
+                    "seeders": seeders_info
                 }
             )
             

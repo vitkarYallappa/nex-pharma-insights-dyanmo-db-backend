@@ -218,8 +218,7 @@ class MigrationController:
                 message=f"Found {len(migrations_info)} migrations",
                 data={
                     "total_migrations": len(migrations_info),
-                    "migrations": migrations_info,
-                    "environment": settings.TABLE_ENVIRONMENT
+                    "migrations": migrations_info
                 }
             )
             

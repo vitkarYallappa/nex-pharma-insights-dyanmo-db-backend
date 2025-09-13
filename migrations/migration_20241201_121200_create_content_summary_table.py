@@ -34,7 +34,7 @@ class CreateContentSummaryTableMigration(BaseMigration):
         try:
             # Get content summary table schema from configuration
             summary_schema = ContentSummaryTableConfig.SCHEMA
-            table_name = ContentSummaryTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentSummaryTableConfig.get_table_name()
             
             # Create the content_summary table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -62,7 +62,7 @@ class CreateContentSummaryTableMigration(BaseMigration):
         
         try:
             # Delete the content_summary table
-            table_name = ContentSummaryTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentSummaryTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

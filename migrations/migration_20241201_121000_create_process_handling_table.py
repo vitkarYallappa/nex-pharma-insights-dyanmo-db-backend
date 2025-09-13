@@ -34,7 +34,7 @@ class CreateProcessHandlingTableMigration(BaseMigration):
         try:
             # Get process handling table schema from configuration
             process_schema = ProcessHandlingTableConfig.SCHEMA
-            table_name = ProcessHandlingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ProcessHandlingTableConfig.get_table_name()
             
             # Create the process_handling table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -62,7 +62,7 @@ class CreateProcessHandlingTableMigration(BaseMigration):
         
         try:
             # Delete the process_handling table
-            table_name = ProcessHandlingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ProcessHandlingTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

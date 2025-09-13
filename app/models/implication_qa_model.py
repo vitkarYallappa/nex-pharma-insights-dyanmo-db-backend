@@ -38,7 +38,7 @@ class ImplicationQaModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ImplicationQaTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ImplicationQaTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, implication_id: str, question: str, answer: str, 

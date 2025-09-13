@@ -34,7 +34,7 @@ class CreateContentAnalysisMappingTableMigration(BaseMigration):
         try:
             # Get content analysis mapping table schema from configuration
             mapping_schema = ContentAnalysisMappingTableConfig.SCHEMA
-            table_name = ContentAnalysisMappingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentAnalysisMappingTableConfig.get_table_name()
             
             # Create the content_analysis_mapping table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -63,7 +63,7 @@ class CreateContentAnalysisMappingTableMigration(BaseMigration):
         
         try:
             # Delete the content_analysis_mapping table
-            table_name = ContentAnalysisMappingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentAnalysisMappingTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

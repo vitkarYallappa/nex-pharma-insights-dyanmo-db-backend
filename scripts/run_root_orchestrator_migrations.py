@@ -24,7 +24,7 @@ async def run_root_orchestrator_migrations():
     print("=" * 60)
     print("Root Orchestrator DynamoDB Migration Script")
     print("=" * 60)
-    print(f"Environment: {settings.TABLE_ENVIRONMENT}")
+    print(f"Environment: {}")
     print(f"AWS Region: {settings.AWS_REGION}")
     print()
     
@@ -113,9 +113,9 @@ async def run_root_orchestrator_migrations():
         print(f"  Pending: {final_status['pending_count']}")
         
         # Show created tables
-        print(f"\n📋 Created tables (environment: {settings.TABLE_ENVIRONMENT}):")
-        print(f"  - {settings.TABLE_ENVIRONMENT}-market_intelligence_requests")
-        print(f"  - {settings.TABLE_ENVIRONMENT}-request_processing_logs")
+        print(f"\n📋 Created tables (environment: {}):")
+        print(f"  - {}-market_intelligence_requests")
+        print(f"  - {}-request_processing_logs")
         
         print(f"\n📝 Tables created without secondary indexes (as requested)")
         print(f"  - Primary key only: request_id for market_intelligence_requests")
@@ -134,7 +134,7 @@ async def rollback_root_orchestrator_migrations():
     print("=" * 60)
     print("Root Orchestrator Migration Rollback")
     print("=" * 60)
-    print(f"Environment: {settings.TABLE_ENVIRONMENT}")
+    print(f"Environment: {}")
     print()
     
     try:

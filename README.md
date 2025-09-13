@@ -278,25 +278,23 @@ Centralized table configuration system supporting multiple environments with aut
 - **audit-logs**: Audit logging with user and action indexes
 
 ### Environment Support
-| Environment | Suffix | Example Table Name |
-|-------------|--------|--------------------|
-| Local | `local` | `users-local` |
-| Development | `dev` | `users-dev` |
-| Staging | `staging` | `users-staging` |
-| Production | `prod` | `users-prod` |
+| Environment | Table Name Example |
+|-------------|-------------------|
+| All Environments | `users` |
+| All Environments | `projects_details` |
 
 ### Usage Examples
 ```python
 from app.config.tables import TableNames, TableConfig
 
-# Get table names
-users_table = TableNames.get_users_table("prod")  # "users-prod"
+# Get table names (no environment suffix)
+users_table = TableNames.get_users_table()  # "users"
 
 # Get complete schema
-config = TableConfig("prod")
+config = TableConfig()
 schema = config.get_schema("users")
 
-# List all tables for environment
+# List all tables
 all_tables = config.list_table_names()
 ```
 
@@ -315,7 +313,6 @@ Create a `.env` file in the project root:
 ```env
 # Environment
 ENVIRONMENT=development
-TABLE_ENVIRONMENT=local
 
 # Server
 HOST=0.0.0.0

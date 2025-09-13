@@ -27,7 +27,7 @@ class PerplexityExtractionsModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name"""
-        return PerplexityExtractionsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return PerplexityExtractionsTableConfig.get_table_name()
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'PerplexityExtractionsModel':

@@ -50,7 +50,7 @@ class ContentAnalysisMappingModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ContentAnalysisMappingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ContentAnalysisMappingTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, content_id: str, primary_summary_id: Optional[str] = None,

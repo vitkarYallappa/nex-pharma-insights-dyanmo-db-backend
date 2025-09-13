@@ -35,7 +35,7 @@ class CreatePerplexityExtractionsTableMigration(BaseMigration):
         try:
             # Get perplexity_extractions table schema from configuration
             perplexity_extractions_schema = PerplexityExtractionsTableConfig.SCHEMA
-            table_name = PerplexityExtractionsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = PerplexityExtractionsTableConfig.get_table_name()
             
             # Create the perplexity_extractions table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -60,7 +60,7 @@ class CreatePerplexityExtractionsTableMigration(BaseMigration):
         
         try:
             # Delete the perplexity_extractions table
-            table_name = PerplexityExtractionsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = PerplexityExtractionsTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

@@ -34,7 +34,7 @@ class CreateGlobalKeywordsTableMigration(BaseMigration):
         try:
             # Get global keywords table schema from configuration
             keywords_schema = GlobalKeywordsTableConfig.SCHEMA
-            table_name = GlobalKeywordsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = GlobalKeywordsTableConfig.get_table_name()
             
             # Create the global_keywords table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -62,7 +62,7 @@ class CreateGlobalKeywordsTableMigration(BaseMigration):
         
         try:
             # Delete the global_keywords table
-            table_name = GlobalKeywordsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = GlobalKeywordsTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

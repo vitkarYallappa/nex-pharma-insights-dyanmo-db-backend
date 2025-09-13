@@ -34,7 +34,7 @@ class CreateRequestsTableMigration(BaseMigration):
         try:
             # Get requests table schema from configuration
             requests_schema = RequestsTableConfig.SCHEMA
-            table_name = RequestsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = RequestsTableConfig.get_table_name()
             
             # Create the requests table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -62,7 +62,7 @@ class CreateRequestsTableMigration(BaseMigration):
         
         try:
             # Delete the requests table
-            table_name = RequestsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = RequestsTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

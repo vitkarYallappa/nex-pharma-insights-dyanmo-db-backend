@@ -34,7 +34,7 @@ class CreateImplicationCommentTableMigration(BaseMigration):
         try:
             # Get implication comment table schema from configuration
             comment_schema = ImplicationCommentTableConfig.SCHEMA
-            table_name = ImplicationCommentTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ImplicationCommentTableConfig.get_table_name()
             
             # Create the implication_comment table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -63,7 +63,7 @@ class CreateImplicationCommentTableMigration(BaseMigration):
         
         try:
             # Delete the implication_comment table
-            table_name = ImplicationCommentTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ImplicationCommentTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

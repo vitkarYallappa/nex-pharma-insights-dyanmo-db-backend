@@ -54,7 +54,7 @@ class ContentInsightModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ContentInsightTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ContentInsightTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, url_id: str, content_id: str, insight_text: str, insight_content_file_path: str,

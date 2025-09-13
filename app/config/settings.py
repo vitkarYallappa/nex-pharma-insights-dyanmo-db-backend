@@ -36,13 +36,10 @@ class Settings(BaseSettings):
     AWS_SESSION_TOKEN: Optional[str] = None  # For temporary credentials
     DYNAMODB_ENDPOINT: Optional[str] = "http://localhost:8000"  # For local development
     
-    # Table Configuration
-    TABLE_ENVIRONMENT: str = "local"  # local, dev, staging, prod
-    
     @property
     def table_config(self) -> TableConfig:
-        """Get table configuration for current environment"""
-        return TableConfig(self.TABLE_ENVIRONMENT)
+        """Get table configuration"""
+        return TableConfig()
     
     @property
     def has_real_aws_credentials(self) -> bool:
@@ -60,6 +57,9 @@ class Settings(BaseSettings):
         # If forced AWS mode, always use AWS regardless of credentials
         if self.FORCE_AWS_DYNAMODB:
             return True
+        # If USE_LOCAL_DYNAMODB is explicitly set to False, use AWS DynamoDB
+        if not self.USE_LOCAL_DYNAMODB:
+            return True
         # If real AWS credentials are provided, always use AWS DynamoDB
         if self.has_real_aws_credentials:
             return True
@@ -76,23 +76,14 @@ class Settings(BaseSettings):
             return self.DYNAMODB_ENDPOINT  # Use local endpoint
     
     @property
-    def effective_table_environment(self) -> str:
-        """Get effective table environment based on DynamoDB mode and credentials"""
-        if self.should_use_aws_dynamodb:
-            # Use the configured table environment for AWS
-            return self.TABLE_ENVIRONMENT if self.TABLE_ENVIRONMENT != "local" else "dev"
-        else:
-            return "local"
-    
-    @property
     def aws_credentials_required(self) -> bool:
         """Check if real AWS credentials are required"""
         return self.should_use_aws_dynamodb
     
     @property
     def USERS_TABLE(self) -> str:
-        """Get users table name for current environment"""
-        return TableNames.get_users_table(self.effective_table_environment)
+        """Get users table name"""
+        return TableNames.get_users_table()
     
     # Security
     SECRET_KEY: str = "your-secret-key-here-change-in-production"

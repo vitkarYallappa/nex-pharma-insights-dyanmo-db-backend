@@ -34,7 +34,7 @@ class CreateContentUrlMappingTableMigration(BaseMigration):
         try:
             # Get content URL mapping table schema from configuration
             mapping_schema = ContentUrlMappingTableConfig.SCHEMA
-            table_name = ContentUrlMappingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentUrlMappingTableConfig.get_table_name()
             
             # Create the content_url_mapping table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -63,7 +63,7 @@ class CreateContentUrlMappingTableMigration(BaseMigration):
         
         try:
             # Delete the content_url_mapping table
-            table_name = ContentUrlMappingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentUrlMappingTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

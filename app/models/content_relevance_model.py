@@ -60,7 +60,7 @@ class ContentRelevanceModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ContentRelevanceTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ContentRelevanceTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, url_id: str, content_id: str, relevance_text: str,

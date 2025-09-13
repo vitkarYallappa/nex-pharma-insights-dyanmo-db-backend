@@ -47,7 +47,7 @@ def test_dynamodb_connection():
             print("   No tables found (this is normal for a fresh setup)")
             
         # Test table creation (users table)
-        users_table_name = TableNames.get_users_table(settings.TABLE_ENVIRONMENT)
+        users_table_name = TableNames.get_users_table()
         print(f"\n3. Testing table creation ({users_table_name})...")
         try:
             table_exists = False

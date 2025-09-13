@@ -19,7 +19,7 @@ app/config/
 
 ## 📊 Current Tables
 
-### 1. Users Table (`users-{environment}`)
+### 1. Users Table (`users`)
 
 **Purpose**: User management and authentication
 
@@ -39,7 +39,7 @@ app/config/
 
 **Configuration File**: `app/config/table_configs/users_table.py`
 
-### 2. Projects Details Table (`projects_details-{environment}`)
+### 2. Projects Details Table (`projects_details`)
 
 **Purpose**: Project information and tracking
 
@@ -61,14 +61,12 @@ app/config/
 
 ## 🌍 Environment Support
 
-Tables are automatically named based on the environment:
+Tables use consistent names across all environments:
 
-| Environment | Users Table | Projects Table |
-|-------------|-------------|----------------|
-| **Local** | `users-local` | `projects_details-local` |
-| **Development** | `users-dev` | `projects_details-dev` |
-| **Staging** | `users-staging` | `projects_details-staging` |
-| **Production** | `users-prod` | `projects_details-prod` |
+| Table | Name |
+|-------|------|
+| **Users** | `users` |
+| **Projects** | `projects_details` |
 
 ## 💻 Usage Examples
 
@@ -158,8 +156,8 @@ from app.config.table_configs.users_table import UsersTableConfig
 
 class CreateUsersTableMigration:
     def up(self):
-        schema = UsersTableConfig.get_schema(settings.TABLE_ENVIRONMENT)
-        table_name = UsersTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        schema = UsersTableConfig.get_schema()
+        table_name = UsersTableConfig.get_table_name()
         # Create table using schema...
 ```
 
@@ -273,7 +271,7 @@ This will show:
 ### Environment Variables
 Set the table environment in your `.env` file:
 ```
-TABLE_ENVIRONMENT=local  # or dev, staging, prod
+# TABLE_ENVIRONMENT is no longer used - tables have consistent names
 ```
 
 ### Migration Best Practices
@@ -301,7 +299,7 @@ The table configuration works with these API endpoints:
 
 1. **Table Not Found**: Ensure DynamoDB Local is running and tables are created via migrations
 2. **Import Errors**: Check that table config files are in the correct directory structure
-3. **Environment Mismatch**: Verify `TABLE_ENVIRONMENT` setting matches your target environment
+3. **Table Names**: All tables now use consistent names without environment suffixes
 
 ### Debug Commands
 

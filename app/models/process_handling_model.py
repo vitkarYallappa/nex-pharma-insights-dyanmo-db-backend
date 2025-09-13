@@ -62,7 +62,7 @@ class ProcessHandlingModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ProcessHandlingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ProcessHandlingTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, request_id: str, project_id: str, status: str,

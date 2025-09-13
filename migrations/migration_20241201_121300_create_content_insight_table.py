@@ -34,7 +34,7 @@ class CreateContentInsightTableMigration(BaseMigration):
         try:
             # Get content insight table schema from configuration
             insight_schema = ContentInsightTableConfig.SCHEMA
-            table_name = ContentInsightTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentInsightTableConfig.get_table_name()
             
             # Create the content_insight table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -63,7 +63,7 @@ class CreateContentInsightTableMigration(BaseMigration):
         
         try:
             # Delete the content_insight table
-            table_name = ContentInsightTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = ContentInsightTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

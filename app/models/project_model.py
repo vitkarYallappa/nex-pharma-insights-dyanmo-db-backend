@@ -44,7 +44,7 @@ class ProjectModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ProjectsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ProjectsTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, name: str, created_by: str, description: Optional[str] = None,

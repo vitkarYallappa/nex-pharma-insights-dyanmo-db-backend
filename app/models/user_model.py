@@ -29,7 +29,7 @@ class UserModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name"""
-        return TableNames.get_users_table(settings.TABLE_ENVIRONMENT)
+        return TableNames.get_users_table()
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'UserModel':

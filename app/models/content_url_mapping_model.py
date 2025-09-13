@@ -45,7 +45,7 @@ class ContentUrlMappingModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ContentUrlMappingTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ContentUrlMappingTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, discovered_url: str, title: str, content_id: str,

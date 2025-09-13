@@ -57,7 +57,7 @@ class ContentImplicationModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ContentImplicationTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ContentImplicationTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, url_id: str, content_id: str, implication_text: str,

@@ -36,7 +36,7 @@ def create_dynamodb_client():
 
 def create_users_table(dynamodb):
     """Create users table using schema configuration"""
-    table_name = TableNames.get_users_table(settings.TABLE_ENVIRONMENT)
+    table_name = TableNames.get_users_table()
     users_schema = TableSchemas.USERS_SCHEMA
     
     try:

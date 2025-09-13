@@ -22,7 +22,7 @@ class ProjectsSeeder(BaseSeeder):
     
     def __init__(self):
         super().__init__()
-        self.table_name = ProjectsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        self.table_name = ProjectsTableConfig.get_table_name()
         
     @property
     def name(self) -> str:

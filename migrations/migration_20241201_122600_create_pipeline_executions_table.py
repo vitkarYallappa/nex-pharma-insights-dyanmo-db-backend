@@ -35,7 +35,7 @@ class CreatePipelineExecutionsTableMigration(BaseMigration):
         try:
             # Get pipeline_executions table schema from configuration
             pipeline_executions_schema = PipelineExecutionsTableConfig.SCHEMA
-            table_name = PipelineExecutionsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = PipelineExecutionsTableConfig.get_table_name()
             
             # Create the pipeline_executions table using schema configuration
             table_created = dynamodb_client.create_table(
@@ -60,7 +60,7 @@ class CreatePipelineExecutionsTableMigration(BaseMigration):
         
         try:
             # Delete the pipeline_executions table
-            table_name = PipelineExecutionsTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+            table_name = PipelineExecutionsTableConfig.get_table_name()
             table_deleted = dynamodb_client.delete_table(table_name)
             
             if table_deleted:

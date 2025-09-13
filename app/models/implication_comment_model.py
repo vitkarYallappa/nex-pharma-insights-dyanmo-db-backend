@@ -35,7 +35,7 @@ class ImplicationCommentModel(BaseModel):
     @classmethod
     def table_name(cls) -> str:
         """Return DynamoDB table name for current environment"""
-        return ImplicationCommentTableConfig.get_table_name(settings.TABLE_ENVIRONMENT)
+        return ImplicationCommentTableConfig.get_table_name()
     
     @classmethod
     def create_new(cls, implication_id: str, comment_text: str, comment_type: Optional[str] = None) -> 'ImplicationCommentModel':
