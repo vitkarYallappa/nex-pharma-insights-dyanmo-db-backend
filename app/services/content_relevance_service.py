@@ -29,8 +29,8 @@ class ContentRelevanceService:
         self.logger = logger
     
     async def create_relevance(self, url_id: str, content_id: str, relevance_text: str,
-                             relevance_score: float, is_relevant: bool, relevance_category: str,
-                             confidence_score: float, relevance_content_file_path: Optional[str] = None,
+                             relevance_score: str, is_relevant: bool, relevance_category: str,
+                             confidence_score: str, relevance_content_file_path: Optional[str] = None,
                              version: Optional[int] = None, is_canonical: Optional[bool] = None,
                              preferred_choice: Optional[bool] = None,
                              created_by: str = "system") -> ContentRelevanceModel:
@@ -180,8 +180,8 @@ class ContentRelevanceService:
     
     async def update_relevance_by_content_id(self, content_id: str, is_relevant: bool, 
                                             relevance_text: Optional[str] = None,
-                                            relevance_score: Optional[float] = None,
-                                            confidence_score: Optional[float] = None,
+                                            relevance_score: Optional[str] = None,
+                                            confidence_score: Optional[str] = None,
                                             relevance_category: Optional[str] = None,
                                             updated_by: str = "user") -> ContentRelevanceModel:
         """Update content relevance by content ID - for user-based updates"""
@@ -266,7 +266,7 @@ class ContentRelevanceService:
     
     async def get_relevant_content(self, is_relevant: bool = True,
                                  relevance_category: Optional[str] = None,
-                                 min_score: Optional[float] = None,
+                                 min_score: Optional[str] = None,
                                  limit: Optional[int] = None) -> List[ContentRelevanceModel]:
         """Get relevant content entries with optional filters"""
         try:
@@ -293,7 +293,7 @@ class ContentRelevanceService:
             self.logger.error(f"Get relevant content failed: {str(e)}")
             raise
     
-    async def get_high_confidence_relevance(self, min_confidence: float = 0.8,
+    async def get_high_confidence_relevance(self, min_confidence: str = 0.8,
                                           is_relevant: Optional[bool] = None,
                                           limit: Optional[int] = None) -> List[ContentRelevanceModel]:
         """Get high confidence relevance entries"""
@@ -347,8 +347,8 @@ class ContentRelevanceService:
             raise
     
     async def upsert_relevance(self, url_id: str, content_id: str, relevance_text: str,
-                             relevance_score: float, is_relevant: bool, relevance_category: str,
-                             confidence_score: float, relevance_content_file_path: Optional[str] = None,
+                             relevance_score: str, is_relevant: bool, relevance_category: str,
+                             confidence_score: str, relevance_content_file_path: Optional[str] = None,
                              version: Optional[int] = None, is_canonical: Optional[bool] = None,
                              preferred_choice: Optional[bool] = None,
                              created_by: str = "system") -> ContentRelevanceModel:

@@ -34,7 +34,7 @@ class ContentUrlMappingModel(BaseModel):
     is_canonical: Optional[bool] = Field(None, description="Canonical flag")
     
     # SQLAlchemy: dedup_confidence (Numeric) -> DynamoDB: dedup_confidence (Number)
-    dedup_confidence: Optional[float] = Field(None, description="Deduplication confidence score")
+    dedup_confidence: Optional[str] = Field(None, description="Deduplication confidence score")
     
     # SQLAlchemy: dedup_method (String) -> DynamoDB: dedup_method (String)
     dedup_method: Optional[str] = Field(None, description="Deduplication method")
@@ -50,7 +50,7 @@ class ContentUrlMappingModel(BaseModel):
     @classmethod
     def create_new(cls, discovered_url: str, title: str, content_id: str,
                    source_domain: Optional[str] = None, is_canonical: Optional[bool] = None,
-                   dedup_confidence: Optional[float] = None, dedup_method: Optional[str] = None) -> 'ContentUrlMappingModel':
+                   dedup_confidence: Optional[str] = None, dedup_method: Optional[str] = None) -> 'ContentUrlMappingModel':
         """Create a new content URL mapping instance"""
         now = datetime.utcnow().isoformat()
         
@@ -76,7 +76,11 @@ class ContentUrlMappingModel(BaseModel):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ContentUrlMappingModel':
         """Create model instance from DynamoDB data"""
-        return cls(**data)
+        # Convert Decimal values to strings for Pydantic validation
+        converted_data = data.copy()
+        if 'dedup_confidence' in converted_data and isinstance(converted_data['dedup_confidence'], Decimal):
+            converted_data['dedup_confidence'] = str(converted_data['dedup_confidence'])
+        return cls(**converted_data)
     
     def to_response(self) -> Dict[str, Any]:
         """Convert model to API response format"""
@@ -102,13 +106,13 @@ class ContentUrlMappingModel(BaseModel):
         """Mark URL mapping as canonical"""
         self.is_canonical = True
     
-    def mark_as_duplicate(self, confidence: float, method: str) -> None:
+    def mark_as_duplicate(self, confidence: str, method: str) -> None:
         """Mark URL mapping as duplicate with confidence score"""
         self.is_canonical = False
         self.dedup_confidence = confidence
         self.dedup_method = method
     
-    def update_dedup_info(self, confidence: float, method: str) -> None:
+    def update_dedup_info(self, confidence: str, method: str) -> None:
         """Update deduplication information"""
         self.dedup_confidence = confidence
         self.dedup_method = method 

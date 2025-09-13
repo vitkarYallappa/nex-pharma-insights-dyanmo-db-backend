@@ -29,7 +29,7 @@ class ContentInsightService:
         self.logger = logger
     
     async def create_content_insight(self, url_id: str, content_id: str, insight_text: str, insight_content_file_path: str,
-                            insight_category: Optional[str] = None, confidence_score: Optional[float] = None,
+                            insight_category: Optional[str] = None, confidence_score: Optional[str] = None,
                             version: Optional[int] = None, is_canonical: Optional[bool] = None,
                             preferred_choice: Optional[bool] = None, created_by: Optional[str] = None) -> ContentInsightModel:
         """Create a new content insight entry"""

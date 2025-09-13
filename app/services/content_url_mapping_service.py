@@ -30,7 +30,7 @@ class ContentUrlMappingService:
     
     async def create_content_url_mapping(self, discovered_url: str, title: str, content_id: str,
                             source_domain: Optional[str] = None, is_canonical: Optional[bool] = None,
-                            dedup_confidence: Optional[float] = None, dedup_method: Optional[str] = None) -> ContentUrlMappingModel:
+                            dedup_confidence: Optional[str] = None, dedup_method: Optional[str] = None) -> ContentUrlMappingModel:
         """Create a new content URL mapping entry"""
         try:
             # Validate required fields

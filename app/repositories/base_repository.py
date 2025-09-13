@@ -162,9 +162,9 @@ class BaseRepository(ABC):
             
             updated_item = {**item_dict, **update_data}
             
-            # Convert float values to Decimal for DynamoDB compatibility
+            # Convert str values to Decimal for DynamoDB compatibility
             for key, value in updated_item.items():
-                if isinstance(value, float):
+                if isinstance(value, str):
                     updated_item[key] = Decimal(str(value))
             
             self.table.put_item(Item=updated_item)

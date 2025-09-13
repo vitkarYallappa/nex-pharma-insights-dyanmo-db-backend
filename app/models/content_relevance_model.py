@@ -1,12 +1,13 @@
 """
-Content Relevance Model - Handles relevance analysis and scoring for content entries
-Stores relevance analysis data operations with DynamoDB
+Content Relevance Model - Matches SQLAlchemy schema structure
+Handles content relevance data operations with DynamoDB
 """
 
 import uuid
 from datetime import datetime
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
+from decimal import Decimal
 
 from app.config.table_configs.content_relevance_table import ContentRelevanceTableConfig
 from app.config.settings import settings
@@ -26,8 +27,8 @@ class ContentRelevanceModel(BaseModel):
     # Relevance analysis text - relevance_text (String) -> relevance_text (String)
     relevance_text: str = Field(..., description="Relevance analysis text")
     
-    # Relevance score - relevance_score (Float) -> relevance_score (Number)
-    relevance_score: float = Field(..., description="Relevance score (0.0 to 1.0)")
+    # Relevance score - relevance_score (str) -> relevance_score (Number)
+    relevance_score: str = Field(..., description="Relevance score (0.0 to 1.0)")
     
     # Relevance flag - is_relevant (Boolean) -> is_relevant (Boolean)
     is_relevant: bool = Field(..., description="Whether content is relevant")
@@ -38,8 +39,8 @@ class ContentRelevanceModel(BaseModel):
     # Relevance category - relevance_category (String) -> relevance_category (String)
     relevance_category: str = Field(..., description="Relevance category")
     
-    # Confidence score - confidence_score (Float) -> confidence_score (Number)
-    confidence_score: float = Field(..., description="Confidence score (0.0 to 1.0)")
+    # Confidence score - confidence_score (str) -> confidence_score (Number)
+    confidence_score: str = Field(..., description="Confidence score (0.0 to 1.0)")
     
     # Version - version (Integer) -> version (Number)
     version: Optional[int] = Field(None, description="Version number")
@@ -63,8 +64,8 @@ class ContentRelevanceModel(BaseModel):
     
     @classmethod
     def create_new(cls, url_id: str, content_id: str, relevance_text: str,
-                   relevance_score: float, is_relevant: bool, relevance_category: str,
-                   confidence_score: float, relevance_content_file_path: Optional[str] = None,
+                   relevance_score: str, is_relevant: bool, relevance_category: str,
+                   confidence_score: str, relevance_content_file_path: Optional[str] = None,
                    version: Optional[int] = None, is_canonical: Optional[bool] = None,
                    preferred_choice: Optional[bool] = None,
                    created_by: str = "system") -> 'ContentRelevanceModel':
@@ -98,7 +99,13 @@ class ContentRelevanceModel(BaseModel):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ContentRelevanceModel':
         """Create model instance from DynamoDB data"""
-        return cls(**data)
+        # Convert Decimal values to strings for Pydantic validation
+        converted_data = data.copy()
+        if 'confidence_score' in converted_data and isinstance(converted_data['confidence_score'], Decimal):
+            converted_data['confidence_score'] = str(converted_data['confidence_score'])
+        if 'relevance_score' in converted_data and isinstance(converted_data['relevance_score'], Decimal):
+            converted_data['relevance_score'] = str(converted_data['relevance_score'])
+        return cls(**converted_data)
     
     def to_response(self) -> Dict[str, Any]:
         """Convert model to API response format"""
@@ -125,8 +132,8 @@ class ContentRelevanceModel(BaseModel):
             if hasattr(self, key) and key not in ['pk', 'created_at', 'created_by']:
                 setattr(self, key, value)
     
-    def update_relevance_analysis(self, relevance_text: str, relevance_score: float,
-                                is_relevant: bool, confidence_score: float,
+    def update_relevance_analysis(self, relevance_text: str, relevance_score: str,
+                                is_relevant: bool, confidence_score: str,
                                 relevance_category: Optional[str] = None):
         """Update relevance analysis data"""
         self.relevance_text = relevance_text

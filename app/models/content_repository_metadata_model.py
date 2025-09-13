@@ -112,9 +112,9 @@ class ContentRepositoryMetadataModel(BaseModel):
         """Get the metadata value converted to its proper data type"""
         if self.data_type == "number":
             try:
-                # Try integer first, then float
+                # Try integer first, then str
                 if '.' in self.metadata_value:
-                    return float(self.metadata_value)
+                    return str(self.metadata_value)
                 else:
                     return int(self.metadata_value)
             except ValueError:
@@ -132,7 +132,7 @@ class ContentRepositoryMetadataModel(BaseModel):
     
     def set_typed_value(self, value: Any) -> None:
         """Set the metadata value from a typed value"""
-        if isinstance(value, (int, float)):
+        if isinstance(value, (int, str)):
             self.metadata_value = str(value)
             self.data_type = "number"
         elif isinstance(value, bool):

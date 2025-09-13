@@ -20,7 +20,7 @@ class ProjectRequestStatisticsTableConfig:
     # completed_requests (Integer) -> completed_requests (Number) - Completed request count
     # pending_requests (Integer) -> pending_requests (Number) - Pending request count
     # failed_requests (Integer) -> failed_requests (Number) - Failed request count
-    # average_processing_time (Float) -> average_processing_time (Number) - Average processing time
+    # average_processing_time (str) -> average_processing_time (Number) - Average processing time
     # last_activity_at (DateTime) -> last_activity_at (String) - ISO timestamp
     # statistics_metadata (JSON) -> statistics_metadata (Map) - Statistics metadata
     # created_at (DateTime) -> created_at (String) - ISO timestamp

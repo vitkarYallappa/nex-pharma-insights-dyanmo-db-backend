@@ -21,7 +21,7 @@ class PerplexityContentModel(BaseModel):
         
         # Optional fields with defaults
         self.word_count: Optional[int] = kwargs.get('word_count')
-        self.extraction_confidence: Optional[float] = kwargs.get('extraction_confidence')
+        self.extraction_confidence: Optional[str] = kwargs.get('extraction_confidence')
         self.content_type: str = kwargs.get('content_type', 'article')
         self.language: str = kwargs.get('language', 'en')
         self.created_at: str = kwargs.get('created_at')
@@ -58,7 +58,7 @@ class PerplexityContentModel(BaseModel):
     
     @classmethod
     def create_new(cls, request_id: str, url: str, title: str = '', word_count: Optional[int] = None,
-                   extraction_confidence: Optional[float] = None, content_type: str = 'article',
+                   extraction_confidence: Optional[str] = None, content_type: str = 'article',
                    language: str = 'en') -> 'PerplexityContentModel':
         """Create a new perplexity content model with generated content_id and timestamp"""
         # Generate content_id as {request_id}_{url_hash}
@@ -78,7 +78,7 @@ class PerplexityContentModel(BaseModel):
             created_at=now
         )
     
-    def update_content_metrics(self, word_count: int, extraction_confidence: float):
+    def update_content_metrics(self, word_count: int, extraction_confidence: str):
         """Update content metrics"""
         self.word_count = word_count
         self.extraction_confidence = extraction_confidence

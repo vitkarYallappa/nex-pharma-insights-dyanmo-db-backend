@@ -37,7 +37,7 @@ class ProjectRequestCreationOrchestrator:
     Handles the sequence: Project → Request → Keywords → Source URLs
     """
     
-    def __init__(self, use_dummy_data: bool = True):
+    def __init__(self, use_dummy_data: bool = False):
         self.project_service = ProjectService()
         self.project_request_statistics_service =  ProjectRequestStatisticsService()
         self.project_modules_statistics_service = ProjectModulesStatisticsService()
@@ -127,6 +127,7 @@ class ProjectRequestCreationOrchestrator:
             # Step 7: Generate Dummy Content Data
             self.logger.info(f"[{orchestration_id}] Step 7: Generating dummy content data")
             try:
+                print(f"{self.use_dummy_data}")
                 if self.use_dummy_data:
                     # Use dummy content generation
                     content_results = await self.content_dummy_service.generate_dummy_content(
@@ -145,8 +146,8 @@ class ProjectRequestCreationOrchestrator:
                     content_results = await self._generate_summary_via_api(
                         project=project,
                         request=request,
-                        keywords=keywords_values,
-                        source_urls=base_urls,
+                        keyword_list=keywords_values,
+                        source_urls=created_urls,
                         orchestration_id=orchestration_id
                     )
                     self.logger.info(
@@ -341,7 +342,7 @@ class ProjectRequestCreationOrchestrator:
             # Extract request data
             request_data = {
                 "title": payload.get("title"),
-                "description": payload.get("description"),
+                "description": payload.get("kits_kiqs"),
                 "created_by": payload.get("created_by"),
                 "time_range": payload.get("time_range", {}),
                 "priority": payload.get("priority", "medium"),
@@ -446,6 +447,7 @@ class ProjectRequestCreationOrchestrator:
             # Step 7: Generate Content Data (Dummy or Real API Call)
             self.logger.info(f"[{orchestration_id}] Step 7: Generating content data (dummy: {self.use_dummy_data})")
             try:
+                #dummy not calling
                 if self.use_dummy_data:
                     # Use dummy content generation
                     content_results = await self.content_dummy_service.generate_dummy_content(

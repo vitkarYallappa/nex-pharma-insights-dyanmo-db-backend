@@ -72,7 +72,7 @@ class ContentRelevanceRepository(BaseRepository):
     
     async def get_relevant_content(self, is_relevant: bool = True, 
                                  relevance_category: Optional[str] = None,
-                                 min_score: Optional[float] = None,
+                                 min_score: Optional[str] = None,
                                  limit: Optional[int] = None) -> List[ContentRelevanceModel]:
         """Get relevant content entries with optional filters"""
         query = {"is_relevant": is_relevant}
@@ -88,7 +88,7 @@ class ContentRelevanceRepository(BaseRepository):
             
         return results
     
-    async def get_high_confidence_relevance(self, min_confidence: float = 0.8,
+    async def get_high_confidence_relevance(self, min_confidence: str = 0.8,
                                           is_relevant: Optional[bool] = None,
                                           limit: Optional[int] = None) -> List[ContentRelevanceModel]:
         """Get high confidence relevance entries"""

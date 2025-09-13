@@ -32,7 +32,7 @@ class ProjectRequestStatisticsModel(BaseModel):
     # SQLAlchemy: failed_requests (Integer) -> DynamoDB: failed_requests (Number)
     failed_requests: Optional[int] = Field(None, description="Failed request count")
     
-    # SQLAlchemy: average_processing_time (Float) -> DynamoDB: average_processing_time (Number)
+    # SQLAlchemy: average_processing_time (str) -> DynamoDB: average_processing_time (Number)
     average_processing_time: Optional[int] = Field(None, description="Average processing time in seconds")
     
     # SQLAlchemy: last_activity_at (DateTime) -> DynamoDB: last_activity_at (String)

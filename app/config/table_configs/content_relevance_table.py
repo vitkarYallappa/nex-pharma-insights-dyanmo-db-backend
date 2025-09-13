@@ -17,11 +17,11 @@ class ContentRelevanceTableConfig:
     # url_id (UUID) -> url_id (String) - URL ID reference (same as content_id)
     # content_id (UUID) -> content_id (String) - Content repository reference
     # relevance_text (String) -> relevance_text (String) - Relevance analysis text
-    # relevance_score (Float) -> relevance_score (Number) - Relevance score
+    # relevance_score (str) -> relevance_score (Number) - Relevance score
     # is_relevant (Boolean) -> is_relevant (Boolean) - Whether content is relevant
     # relevance_content_file_path (String) -> relevance_content_file_path (String) - File path
     # relevance_category (String) -> relevance_category (String) - Relevance category
-    # confidence_score (Float) -> confidence_score (Number) - Confidence score
+    # confidence_score (str) -> confidence_score (Number) - Confidence score
     # version (Integer) -> version (Number) - Version number
     # is_canonical (Boolean) -> is_canonical (Boolean) - Canonical status
     # preferred_choice (Boolean) -> preferred_choice (Boolean) - Preferred choice flag

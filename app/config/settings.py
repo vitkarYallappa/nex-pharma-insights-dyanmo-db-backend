@@ -26,9 +26,13 @@ class Settings(BaseSettings):
     DATABASE_TYPE: str = "dynamodb"  # dynamodb, sqlite
     AWS_REGION: str = "us-east-1"
     
+    # DynamoDB Mode Configuration
+    USE_LOCAL_DYNAMODB: bool = False  # True for local DynamoDB, False for AWS DynamoDB
+    
     # AWS DynamoDB Configuration
     AWS_ACCESS_KEY_ID: Optional[str] = "dummy"  # Default for local development
     AWS_SECRET_ACCESS_KEY: Optional[str] = "dummy"  # Default for local development
+    AWS_SESSION_TOKEN: Optional[str] = None  # For temporary credentials
     DYNAMODB_ENDPOINT: Optional[str] = "http://localhost:8000"  # For local development
     
     # Table Configuration
@@ -40,9 +44,51 @@ class Settings(BaseSettings):
         return TableConfig(self.TABLE_ENVIRONMENT)
     
     @property
+    def has_real_aws_credentials(self) -> bool:
+        """Check if real AWS credentials are provided (not dummy values)"""
+        return (
+            self.AWS_ACCESS_KEY_ID and 
+            self.AWS_SECRET_ACCESS_KEY and
+            self.AWS_ACCESS_KEY_ID != "dummy" and 
+            self.AWS_SECRET_ACCESS_KEY != "dummy"
+        )
+    
+    @property
+    def should_use_aws_dynamodb(self) -> bool:
+        """Determine if AWS DynamoDB should be used based on credentials and configuration"""
+        # If real AWS credentials are provided, always use AWS DynamoDB
+        if self.has_real_aws_credentials:
+            return True
+        # If dummy credentials, always use local DynamoDB (safer)
+        else:
+            return False
+    
+    @property
+    def dynamodb_endpoint(self) -> Optional[str]:
+        """Get DynamoDB endpoint based on configuration and credentials"""
+        if self.should_use_aws_dynamodb:
+            return None  # Use AWS DynamoDB service (no endpoint needed)
+        else:
+            return self.DYNAMODB_ENDPOINT  # Use local endpoint
+    
+    @property
+    def effective_table_environment(self) -> str:
+        """Get effective table environment based on DynamoDB mode and credentials"""
+        if self.should_use_aws_dynamodb:
+            # Use the configured table environment for AWS
+            return self.TABLE_ENVIRONMENT if self.TABLE_ENVIRONMENT != "local" else "dev"
+        else:
+            return "local"
+    
+    @property
+    def aws_credentials_required(self) -> bool:
+        """Check if real AWS credentials are required"""
+        return self.should_use_aws_dynamodb
+    
+    @property
     def USERS_TABLE(self) -> str:
         """Get users table name for current environment"""
-        return TableNames.get_users_table(self.TABLE_ENVIRONMENT)
+        return TableNames.get_users_table(self.effective_table_environment)
     
     # Security
     SECRET_KEY: str = "your-secret-key-here-change-in-production"

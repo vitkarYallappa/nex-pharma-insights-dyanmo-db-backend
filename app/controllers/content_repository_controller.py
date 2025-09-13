@@ -74,8 +74,8 @@ class ContentRepositoryController:
                                            content_id: str,
                                            is_relevant: bool,
                                            relevance_text: Optional[str] = None,
-                                           relevance_score: Optional[float] = None,
-                                           confidence_score: Optional[float] = None,
+                                           relevance_score: Optional[str] = None,
+                                           confidence_score: Optional[str] = None,
                                            relevance_category: Optional[str] = None,
                                            updated_by: Optional[str] = None,
                                            api_request_id: Optional[str] = None) -> APIResponse:

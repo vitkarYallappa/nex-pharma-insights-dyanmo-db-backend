@@ -20,8 +20,8 @@ class UpdateRelevanceRequest(BaseModel):
     """Request model for updating content relevance"""
     is_relevant: bool = Field(..., description="Whether the content is relevant")
     relevance_text: Optional[str] = Field(None, description="Updated relevance analysis text")
-    relevance_score: Optional[float] = Field(None, ge=0.0, le=1.0, description="Relevance score (0.0 to 1.0)")
-    confidence_score: Optional[float] = Field(None, ge=0.0, le=1.0, description="Confidence score (0.0 to 1.0)")
+    relevance_score: Optional[str] = Field(None, ge=0.0, le=1.0, description="Relevance score (0.0 to 1.0)")
+    confidence_score: Optional[str] = Field(None, ge=0.0, le=1.0, description="Confidence score (0.0 to 1.0)")
     relevance_category: Optional[str] = Field(None, description="Relevance category")
     updated_by: Optional[str] = Field(None, description="User who updated the relevance")
 

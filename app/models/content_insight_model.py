@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
+from decimal import Decimal
 
 from app.config.table_configs.content_insight_table import ContentInsightTableConfig
 from app.config.settings import settings
@@ -33,7 +34,7 @@ class ContentInsightModel(BaseModel):
     insight_category: Optional[str] = Field(None, description="Insight category")
     
     # SQLAlchemy: confidence_score (Numeric) -> DynamoDB: confidence_score (Number)
-    confidence_score: Optional[float] = Field(None, description="Confidence score")
+    confidence_score: Optional[str] = Field(None, description="Confidence score")
     
     # SQLAlchemy: version (Integer) -> DynamoDB: version (Number)
     version: Optional[int] = Field(None, description="Version number")
@@ -57,7 +58,7 @@ class ContentInsightModel(BaseModel):
     
     @classmethod
     def create_new(cls, url_id: str, content_id: str, insight_text: str, insight_content_file_path: str,
-                   insight_category: Optional[str] = None, confidence_score: Optional[float] = None,
+                   insight_category: Optional[str] = None, confidence_score: Optional[str] = None,
                    version: Optional[int] = None, is_canonical: Optional[bool] = None,
                    preferred_choice: Optional[bool] = None, created_by: Optional[str] = None) -> 'ContentInsightModel':
         """Create a new content insight instance"""
@@ -88,7 +89,11 @@ class ContentInsightModel(BaseModel):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ContentInsightModel':
         """Create model instance from DynamoDB data"""
-        return cls(**data)
+        # Convert Decimal values to strings for Pydantic validation
+        converted_data = data.copy()
+        if 'confidence_score' in converted_data and isinstance(converted_data['confidence_score'], Decimal):
+            converted_data['confidence_score'] = str(converted_data['confidence_score'])
+        return cls(**converted_data)
     
     def to_response(self) -> Dict[str, Any]:
         """Convert model to API response format"""
@@ -121,7 +126,7 @@ class ContentInsightModel(BaseModel):
         """Mark insight as preferred choice"""
         self.preferred_choice = True
     
-    def update_confidence(self, score: float) -> None:
+    def update_confidence(self, score: str) -> None:
         """Update confidence score"""
         self.confidence_score = score
     

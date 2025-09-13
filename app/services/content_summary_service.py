@@ -29,7 +29,7 @@ class ContentSummaryService:
         self.logger = logger
     
     async def create_content_summary(self, url_id: str, content_id: str, summary_text: str, summary_content_file_path: str,
-                            confidence_score: Optional[float] = None, version: Optional[int] = None,
+                            confidence_score: Optional[str] = None, version: Optional[int] = None,
                             is_canonical: Optional[bool] = None, preferred_choice: Optional[bool] = None,
                             created_by: Optional[str] = None) -> ContentSummaryModel:
         """Create a new content summary entry"""

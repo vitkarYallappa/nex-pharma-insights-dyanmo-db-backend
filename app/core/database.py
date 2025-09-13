@@ -27,33 +27,54 @@ class DynamoDBClient:
             return
             
         try:
-            if settings.is_development and settings.DYNAMODB_ENDPOINT:
-                logger.info(f"Connecting to local DynamoDB at {settings.DYNAMODB_ENDPOINT}")
+            # Use the new smart detection logic
+            if settings.should_use_aws_dynamodb:
+                logger.info(f"Connecting to AWS DynamoDB in region {settings.AWS_REGION}")
+                logger.info(f"Using credentials: {settings.AWS_ACCESS_KEY_ID[:10]}...")
+                try:
+                    # Build boto3 resource parameters
+                    boto3_params = {
+                        'service_name': 'dynamodb',
+                        'region_name': settings.AWS_REGION,
+                        'aws_access_key_id': settings.AWS_ACCESS_KEY_ID,
+                        'aws_secret_access_key': settings.AWS_SECRET_ACCESS_KEY
+                    }
+                    
+                    # Add session token if provided
+                    if settings.AWS_SESSION_TOKEN:
+                        boto3_params['aws_session_token'] = settings.AWS_SESSION_TOKEN
+                        logger.info("Using temporary credentials with session token")
+                    
+                    self.dynamodb = boto3.resource(**boto3_params)
+                    # Test the connection immediately
+                    self._test_connection()
+                    logger.info("AWS DynamoDB connection successful")
+                except Exception as aws_error:
+                    logger.warning(f"AWS DynamoDB connection failed: {str(aws_error)}")
+                    logger.info("Falling back to local DynamoDB")
+                    # Fall back to local DynamoDB
+                    self.dynamodb = boto3.resource(
+                        'dynamodb',
+                        endpoint_url=settings.DYNAMODB_ENDPOINT,
+                        region_name=settings.AWS_REGION,
+                        aws_access_key_id='local',
+                        aws_secret_access_key='local'
+                    )
+                    # Test local connection
+                    self._test_connection()
+            else:
+                logger.info(f"Connecting to local DynamoDB at {settings.dynamodb_endpoint}")
+                logger.info("Using dummy credentials for local development")
                 self.dynamodb = boto3.resource(
                     'dynamodb',
-                    endpoint_url=settings.DYNAMODB_ENDPOINT,
+                    endpoint_url=settings.dynamodb_endpoint,
                     region_name=settings.AWS_REGION,
-                    aws_access_key_id='dummy',
-                    aws_secret_access_key='dummy'
+                    aws_access_key_id='local',
+                    aws_secret_access_key='local'
                 )
-            else:
-                logger.info(f"Connecting to AWS DynamoDB in region {settings.AWS_REGION}")
-                if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY:
-                    self.dynamodb = boto3.resource(
-                        'dynamodb',
-                        region_name=settings.AWS_REGION,
-                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
-                    )
-                else:
-                    # Use default credentials (IAM role, environment, etc.)
-                    self.dynamodb = boto3.resource(
-                        'dynamodb',
-                        region_name=settings.AWS_REGION
-                    )
-            
-            # Test connection
-            self._test_connection()
+                # Test connection for local DynamoDB
+                self._test_connection()
+
             logger.info("DynamoDB client initialized successfully")
             self.initialized = True
             
@@ -240,7 +261,7 @@ class DynamoDBClient:
                 'response_time_seconds': round(response_time, 3),
                 'total_tables': len(tables),
                 'configured_tables': table_status,
-                'endpoint': settings.DYNAMODB_ENDPOINT if settings.is_development else 'AWS DynamoDB',
+                'endpoint': settings.dynamodb_endpoint if settings.dynamodb_endpoint else 'AWS DynamoDB',
                 'region': settings.AWS_REGION
             }
             
@@ -252,7 +273,7 @@ class DynamoDBClient:
             return {
                 'status': 'unhealthy',
                 'error': str(e),
-                'endpoint': settings.DYNAMODB_ENDPOINT if settings.is_development else 'AWS DynamoDB',
+                'endpoint': settings.dynamodb_endpoint if settings.dynamodb_endpoint else 'AWS DynamoDB',
                 'region': settings.AWS_REGION
             }
 

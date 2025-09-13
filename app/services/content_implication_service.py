@@ -30,7 +30,7 @@ class ContentImplicationService:
     
     async def create_content_implication(self, url_id: str, content_id: str, implication_text: str,
                             implication_content_file_path: Optional[str] = None, implication_type: Optional[str] = None,
-                            priority_level: Optional[str] = None, confidence_score: Optional[float] = None,
+                            priority_level: Optional[str] = None, confidence_score: Optional[str] = None,
                             version: Optional[int] = None, is_canonical: Optional[bool] = None,
                             preferred_choice: Optional[bool] = None, created_by: Optional[str] = None) -> ContentImplicationModel:
         """Create a new content implication entry"""
